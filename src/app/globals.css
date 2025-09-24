@@ -1,26 +1,215 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@import "tailwindcss";
+
+/* ایران‌سنس با وزن‌های مختلف */
+@font-face {
+  font-family: "IranSans";
+  src: url("../../public/fonts/IRANSansX-UltraLight.woff2") format("woff2"),
+    url("../../public/fonts/IRANSansX-UltraLight.woff") format("woff");
+  font-weight: 100; /* Thin */
+  font-style: normal;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@font-face {
+  font-family: "IranSans";
+  src: url("../../public/fonts/IRANSansX-Light.woff2") format("woff2"),
+    url("../../public/fonts/IRANSansX-Light.woff") format("woff");
+  font-weight: 300; /* Light */
+  font-style: normal;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@font-face {
+  font-family: "IranSans";
+  src: url("../../public/fonts/IRANSansX-Regular.woff2") format("woff2"),
+    url("../../public/fonts/IRANSansX-Regular.woff") format("woff");
+  font-weight: 400; /* Regular */
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "IranSans";
+  src: url("../../public/fonts/IRANSansX-Medium.woff2") format("woff2"),
+    url("../../public/fonts/IRANSansX-Medium.woff") format("woff");
+  font-weight: 500; /* Medium */
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "IranSans";
+  src: url("../../public/fonts/IRANSansX-DemiBold.woff2") format("woff2"),
+    url("../../public/fonts/IRANSansX-UltraLight.woff") format("woff");
+  font-weight: 600; /* SemiBold */
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "IranSans";
+  src: url("../../public/fonts/IRANSansX-Bold.woff2") format("woff2"),
+    url("../../public/fonts/IRANSansX-Bold.woff") format("woff");
+  font-weight: 700; /* Bold */
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "IranSans";
+  src: url("../../public/fonts/IRANSansX-ExtraBold.woff2") format("woff2"),
+    url("../../public/fonts/IRANSansX-ExtraBold.woff") format("woff");
+  font-weight: 800; /* ExtraBold */
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "IranSans";
+  src: url("../../public/fonts/IRANSansX-Black.woff2") format("woff2"),
+    url("../../public/fonts/IRANSansX-Black.woff") format("woff");
+  font-weight: 900; /* Black */
+  font-style: normal;
+}
+
+/* تعریف کلاس container */
+@layer components {
+  .container {
+    width: 100%;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem; /* 16px */
+    padding-right: 1rem; /* 16px */
   }
+
+  /* responsive breakpoints */
+  @screen sm {
+    .container {
+      max-width: 640px;
+    }
+  }
+  @screen md {
+    .container {
+      max-width: 768px;
+    }
+  }
+  @screen lg {
+    .container {
+      max-width: 1024px;
+    }
+  }
+  @screen xl {
+    .container {
+      max-width: 1280px;
+    }
+  }
+  @screen 2xl {
+    .container {
+      max-width: 1536px;
+    }
+  }
+  @keyframes bounce-slow {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+    -webkit-transform: translateY(0) rotate(0deg);
+    -moz-transform: translateY(0) rotate(0deg);
+    -ms-transform: translateY(0) rotate(0deg);
+    -o-transform: translateY(0) rotate(0deg);
+}
+  25% {
+    transform: translateY(-5px) rotate(3deg);
+    -webkit-transform: translateY(-5px) rotate(3deg);
+    -moz-transform: translateY(-5px) rotate(3deg);
+    -ms-transform: translateY(-5px) rotate(3deg);
+    -o-transform: translateY(-5px) rotate(3deg);
+}
+  50% {
+    transform: translateY(0) rotate(-3deg);
+    -webkit-transform: translateY(0) rotate(-3deg);
+    -moz-transform: translateY(0) rotate(-3deg);
+    -ms-transform: translateY(0) rotate(-3deg);
+    -o-transform: translateY(0) rotate(-3deg);
+}
+  75% {
+    transform: translateY(-3px) rotate(2deg);
+    -webkit-transform: translateY(-3px) rotate(2deg);
+    -moz-transform: translateY(-3px) rotate(2deg);
+    -ms-transform: translateY(-3px) rotate(2deg);
+    -o-transform: translateY(-3px) rotate(2deg);
+}
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.animate-bounce-slow {
+  animation: bounce-slow 3s infinite ease-in-out;
+  -webkit-animation: bounce-slow 3s infinite ease-in-out;
 }
+
+
+@keyframes float-up-down {
+  0%, 100% {
+    transform: translateY(0);
+    -webkit-transform: translateY(0);
+    -moz-transform: translateY(0);
+    -ms-transform: translateY(0);
+    -o-transform: translateY(0);
+}
+  50% {
+    transform: translateY(-10px);
+    -webkit-transform: translateY(-10px);
+    -moz-transform: translateY(-10px);
+    -ms-transform: translateY(-10px);
+    -o-transform: translateY(-10px);
+}
+}
+
+.animate-float {
+  animation: float-up-down 4s ease-in-out infinite;
+  -webkit-animation: float-up-down 4s ease-in-out infinite;
+}
+
+/* مخفی کردن اسکرول */
+body {
+  overflow-y: scroll; /* همیشه جا برای اسکرول باشه */
+  scrollbar-width: none; /* Firefox */
+}
+
+body::-webkit-scrollbar {
+  width: 0px; /* Chrome, Safari */
+}
+
+/* وقتی موس روی صفحه اومد → اسکرول نشون بده */
+body:hover {
+  scrollbar-width: thin; /* Firefox */
+}
+
+body:hover::-webkit-scrollbar {
+  width: 8px; /* Chrome, Safari */
+}
+
+body:hover::-webkit-scrollbar-thumb {
+  background: #49c5b6;
+  /*رنگاسکرول*/border-radius: 4px;
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
+}
+
+
+
+}
+
+@theme {
+  --font-sans: "IranSans", system-ui, sans-serif;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background-color: #000;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #49c5b6;
+  border-radius: 15px;
+
+}
+
+
+
