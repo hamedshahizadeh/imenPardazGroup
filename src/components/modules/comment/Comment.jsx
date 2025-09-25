@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { FaRegCommentDots, FaReply, FaUser, FaClock } from "react-icons/fa";
-import toast, { Toaster } from "react-hot-toast";
+import { FaRegCommentDots, FaUser, FaClock } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 export default function Comments({ initialComments = [], isLoggedIn }) {
   const [comments, setComments] = useState(initialComments);
@@ -161,12 +161,14 @@ export default function Comments({ initialComments = [], isLoggedIn }) {
                     <FaUser className="text-[#49C5B6] text-xs" />
                     <span className="text-xs md:text-sm">{c.author}</span>
                   </div>
-                  <button
-                    onClick={() => openReplyModal(c.id)}
-                    className="text-[10px] md:text-xs text-[#49C5B6] hover:text-[#31CCBA] self-start cursor-pointer  whitespace-nowrap"
-                  >
-                    پاسخ دادن
-                  </button>
+                  <div>
+                    <button
+                      onClick={() => openReplyModal(c.id)}
+                      className="text-[10px] md:text-xs text-[#49C5B6] hover:text-[#31CCBA] self-start cursor-pointer  whitespace-nowrap"
+                    >
+                      پاسخ دادن
+                    </button>
+                  </div>
                 </div>
                 <div className=" text-gray-400  mt-1">
                   <div className="flex items-start gap-1 mb-1">

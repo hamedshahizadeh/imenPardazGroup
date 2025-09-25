@@ -11,7 +11,7 @@ export default function Section1() {
      <div>
   <div className="max-w-4xl mx-auto  py-10  text-white mt-10">
     <h1 className="text-base md:text-xl font-sans font-black mb-3">
-      مدیریت هوشمند سازمان <span className="text-[#49C5B6]">(ایمن پرداز)</span>
+      مدیریت هوشمند سازمان (<span className="text-[#49C5B6]">ایمن پرداز</span>)
     </h1>
 
     <h2 className="text-sm md:text-base font-bold text-[#49C5B6] mb-3">

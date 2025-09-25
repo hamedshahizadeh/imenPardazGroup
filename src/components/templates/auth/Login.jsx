@@ -4,11 +4,12 @@ import { useState } from "react";
 import { FaEnvelope, FaLock, FaSignInAlt } from "react-icons/fa";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+ const router = useRouter();
   const handleLogin = (e) => {
     e.preventDefault();
 
@@ -19,7 +20,10 @@ export default function LoginPage() {
 
     // مثال ساده ورود موفق
     if (email === "test@test.com" && password === "123456") {
-      toast.success("ورود موفقیت‌آمیز بود! 🎉");
+    toast.success("ورود موفقیت‌آمیز بود!");
+      setEmail("");
+      setPassword("");
+      router.push("/dashboard"); // هدایت به صفحه داشبورد
     } else {
       toast.error("ایمیل یا رمز عبور اشتباه است!");
     }
