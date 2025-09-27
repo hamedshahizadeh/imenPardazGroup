@@ -12,24 +12,27 @@ import {
   FaCogs,
   FaUsers,
   FaBlog,
-  FaEnvelope,
+  FaBuilding,
   FaComments,
-  FaCrown,
+  FaVideo,
   FaUserShield,
   FaStar,
   FaUser,
   FaChevronDown,
+  FaCommentDots
 } from "react-icons/fa";
 
 export default function DashboardLayout({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
-const router = useRouter()
+  const [siteMenuOpen, setSiteMenuOpen] = useState(false);
+
+  const router = useRouter();
   const handleLogout = () => {
     setShowModal(false);
     toast.success("خروج شما با موفقیت انجام شد");
-    router.push("/")
+    router.push("/");
     // اینجا میتونی ریدایرکت کنی مثلا:
     // router.push("/logout") یا API لاگ اوت بزنی
   };
@@ -79,7 +82,6 @@ const router = useRouter()
           </p>
         </div>
         <ul className="space-y-2 mt-4 ">
-      
           <li>
             <Link
               href="/dashboard"
@@ -93,21 +95,84 @@ const router = useRouter()
             </Link>
           </li>
 
-         
           <li>
-            <Link
-              href="/dashboard/site-management"
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center gap-3 text-xs md:text-sm font-sans font-medium 
-                     bg-white/10 hover:bg-white/20 rounded-xl px-3 py-2 
-                     transition duration-300 text-gray-100"
+            <button
+              onClick={() => setSiteMenuOpen(!siteMenuOpen)}
+              className="w-full flex items-center justify-between gap-3 text-xs md:text-sm font-sans font-medium 
+           bg-white/10 hover:bg-white/20 rounded-xl px-3 py-2 
+           transition duration-300 text-gray-100"
             >
-              <FaCogs className="text-lg text-[#49C5B6]" />
-              <span>مدیریت کلی سایت</span>
-            </Link>
+              <div className="flex items-center gap-3 text-xs md:text-sm font-medium">
+                <FaCogs className="text-lg text-[#49C5B6]" />
+                <span>مدیریت کلی سایت</span>
+              </div>
+              <FaChevronDown
+                className={`transition-transform ${
+                  siteMenuOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+            {siteMenuOpen && (
+              <ul className="px-1 md:px-2 mt-2 space-y-2">
+                {/* سازمان‌ها */}
+                <li>
+                  <Link
+                    href="/dashboard/site-management/organizations"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 text-xs md:text-sm font-sans font-medium 
+               bg-white/5 hover:bg-white/15 rounded-lg px-3 py-2 
+               text-gray-300 hover:text-white transition"
+                  >
+                    <FaBuilding className="text-sm text-[#49C5B6]" />
+                    <span>سازمان‌ها</span>
+                  </Link>
+                </li>
+
+                {/* نظرات مشتریان */}
+                <li>
+                  <Link
+                    href="/dashboard/site-management/customer-reviews"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 text-xs md:text-sm font-sans font-medium 
+               bg-white/5 hover:bg-white/15 rounded-lg px-3 py-2 
+               text-gray-300 hover:text-white transition"
+                  >
+                    <FaComments className="text-sm text-[#49C5B6]" />
+                    <span>نظرات مشتریان</span>
+                  </Link>
+                </li>
+
+                {/* تیم ما */}
+                <li>
+                  <Link
+                    href="/dashboard/team"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 text-xs md:text-sm font-sans font-medium 
+               bg-white/5 hover:bg-white/15 rounded-lg px-3 py-2 
+               text-gray-300 hover:text-white transition"
+                  >
+                    <FaUsers className="text-sm text-[#49C5B6]" />
+                    <span>تیم ما</span>
+                  </Link>
+                </li>
+
+                {/* ویدیوها */}
+                <li>
+                  <Link
+                    href="/dashboard/videos"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 text-xs md:text-sm font-sans font-medium 
+               bg-white/5 hover:bg-white/15 rounded-lg px-3 py-2 
+               text-gray-300 hover:text-white transition"
+                  >
+                    <FaVideo className="text-sm text-[#49C5B6]" />
+                    <span>ویدیوها</span>
+                  </Link>
+                </li>
+              </ul>
+            )}
           </li>
 
-         
           <li>
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
@@ -187,7 +252,6 @@ const router = useRouter()
             </Link>
           </li>
 
-        
           {/* مدیریت کامنت‌ها */}
           <li>
             <Link
@@ -202,6 +266,19 @@ const router = useRouter()
             </Link>
           </li>
 
+          {/* کامنت‌های من */}
+          <li>
+            <Link
+              href="/dashboard/my-comments"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-3 text-xs md:text-sm font-sans font-medium 
+           bg-white/10 hover:bg-white/20 rounded-xl px-3 py-2 
+           transition duration-300 text-gray-100"
+            >
+              <FaCommentDots className="text-lg text-[#49C5B6]" />
+              <span>کامنت‌های من</span>
+            </Link>
+          </li>
           {/* خروج */}
           <li>
             <button
@@ -237,7 +314,7 @@ const router = useRouter()
       >
         {children}
       </main>
-     
+
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800/10 backdrop-blur-xs z-50">
           <div className="bg-gray-900/90 backdrop-blur-xs rounded-2xl p-6 shadow-lg max-w-sm w-full text-center">
@@ -245,7 +322,7 @@ const router = useRouter()
               آیا مطمئن هستید که می‌خواهید خارج شوید؟
             </h2>
             <div className="flex justify-center gap-4 mt-2 md:mt-3 lg:mt-4">
-               <button
+              <button
                 onClick={handleLogout}
                 className="px-3 text-xs md:text-sm font-medium py-2 cursor-pointer rounded-lg bg-red-600 hover:bg-red-700 text-white transition"
               >
@@ -257,7 +334,6 @@ const router = useRouter()
               >
                 بستن
               </button>
-             
             </div>
           </div>
         </div>
