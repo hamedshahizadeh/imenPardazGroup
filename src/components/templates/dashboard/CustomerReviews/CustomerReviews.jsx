@@ -93,7 +93,7 @@ export default function CustomerReviews() {
   };
 
   return (
-    <div className="p-6 container">
+    <div className=" container">
       <div className="flex justify-end">
         {/* دکمه افزودن نظر */}
         <button

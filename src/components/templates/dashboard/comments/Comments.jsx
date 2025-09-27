@@ -155,7 +155,7 @@ export default function CommentsDashboard() {
   };
 
   return (
-    <div className="space-y-4 container p-4">
+    <div className="space-y-4 container">
       <h1 className="text-lg font-bold text-white mb-4">داشبورد مدیریت کامنت‌ها</h1>
 
       {/* فیلتر وضعیت */}

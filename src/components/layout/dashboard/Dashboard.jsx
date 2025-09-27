@@ -307,7 +307,7 @@ export default function DashboardLayout({ children }) {
     pt-6 
     transition-all duration-300 ease-in-out 
     relative z-10 
-    container
+  
     overflow-y-auto
     pb-5
   "
