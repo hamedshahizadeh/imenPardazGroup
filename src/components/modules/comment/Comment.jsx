@@ -96,8 +96,8 @@ export default function Comments({ initialComments = [], isLoggedIn }) {
             className="bg-slate-700 p-2 rounded-md flex flex-col gap-1"
           >
             <div className="">
-              <div className="flex flex-col gap-1">
-                <div className="flex  justify-between">
+              <div className="flex flex-col gap-1 w-full">
+                <div className="flex  justify-between w-full">
                   <div className="flex items-center gap-1">
                     <FaUser className="text-[#49C5B6] text-xs" />
                     <span className="text-xs md:text-sm">{r.author}</span>
@@ -155,8 +155,8 @@ export default function Comments({ initialComments = [], isLoggedIn }) {
             className="p-3 bg-slate-800 rounded-md flex flex-col gap-2"
           >
             <div className="flex justify-between items-start">
-              <div className="flex flex-col gap-1">
-                <div className="flex  justify-between ">
+              <div className="flex flex-col gap-1 w-full">
+                <div className="flex  justify-between w-full">
                   <div className="flex items-center gap-1">
                     <FaUser className="text-[#49C5B6] text-xs" />
                     <span className="text-xs md:text-sm">{c.author}</span>

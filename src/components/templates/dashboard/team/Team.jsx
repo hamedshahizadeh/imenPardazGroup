@@ -90,7 +90,7 @@ const handleAddSave = () => {
   };
 
   return (
-    <div className=" min-h-screen text-gray-100">
+    <div className=" min-h-screen text-gray-100 container">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-sm lg:text-base font-bold">تیم ما</h1>
         <button
@@ -144,7 +144,7 @@ const handleAddSave = () => {
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800/10 backdrop-blur-xs z-50">
           <div className="bg-gray-900/90 backdrop-blur-xs rounded-2xl p-6 shadow-lg max-w-sm w-full text-center">
             <h2 className="text-xs md:text-sm font-medium text-white mb-2 md:mb-4">آیا مطمئن هستید که می‌خواهید کاربر</h2>
-            <span className="mb-6 text-[#49C5B6]">{memberToDelete.name} </span>
+            <span className=" mb-2 md:mb-4 text-[#49C5B6]">{memberToDelete.name} </span>
             را حذف کنید ؟
             <div className="flex justify-center gap-4 mt-2 md:mt-3 lg:mt-4">
               <button

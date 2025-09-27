@@ -72,7 +72,7 @@ export default function RegularUsers() {
   };
 
   return (
-    <div className="space-y-6 p-4 font-medium">
+    <div className="space-y-6 container font-medium">
       {/* هدر */}
       <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl shadow-md flex flex-col md:flex-row items-center gap-4">
         <h1 className="text-gray-200 text-sm md:text-base">مدیریت کاربران عادی</h1>

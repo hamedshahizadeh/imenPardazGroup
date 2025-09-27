@@ -8,6 +8,7 @@ import {
   FaEdit,
   FaCamera,
   FaIdCard,
+  FaKey,
 } from "react-icons/fa";
 import Image from "next/image";
 import toast from "react-hot-toast";
@@ -15,25 +16,32 @@ import toast from "react-hot-toast";
 export default function DashHome() {
   const [showModal, setShowModal] = useState(false);
   const [animateModal, setAnimateModal] = useState(false);
+
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [animatePasswordModal, setAnimatePasswordModal] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+
   const [username, setUsername] = useState("hamedshahizadeh");
-  const [fullName, setFullName] = useState("حامد شاهی زاده"); // 👈 نام و نام خانوادگی
+  const [fullName, setFullName] = useState("حامد شاهی زاده");
   const [phone, setPhone] = useState("09123456789");
   const [email, setEmail] = useState("user@example.com");
   const [photo, setPhoto] = useState("/images/user.jpeg");
   const role = "مدیر کل";
 
   useEffect(() => {
-    if (showModal) {
-      setTimeout(() => setAnimateModal(true), 10);
-    } else {
-      setAnimateModal(false);
-    }
+    if (showModal) setTimeout(() => setAnimateModal(true), 10);
+    else setAnimateModal(false);
   }, [showModal]);
+
+  useEffect(() => {
+    if (showPasswordModal) setTimeout(() => setAnimatePasswordModal(true), 10);
+    else setAnimatePasswordModal(false);
+  }, [showPasswordModal]);
 
   const handleSave = () => {
     setAnimateModal(false);
     setShowModal(false);
-    toast.success("اطلاعات با موفقیت بروزرسانی شد ");
+    toast.success("اطلاعات با موفقیت بروزرسانی شد ✅");
   };
 
   const handlePhotoChange = (e) => {
@@ -42,8 +50,20 @@ export default function DashHome() {
     }
   };
 
+  const handlePasswordChange = () => {
+    if (newPassword.length < 4) {
+      toast.error("رمز عبور نباید کمتر از ۴ رقم باشد ❌");
+      return;
+    }
+    setAnimatePasswordModal(false);
+    setShowPasswordModal(false);
+    setNewPassword("");
+    toast.success("رمز عبور با موفقیت تغییر کرد 🔑");
+  };
+
   return (
-    <div className="py-4 px-2 md:px-4 lg:px-5 w-full space-y-6 text-gray-200">
+    <div className="py-4 container w-full space-y-6 text-gray-200">
+      {/* خوشامد */}
       <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl shadow-md">
         <h1 className="text-xs md:text-sm font-bold text-[#49C5B6] mb-2">
           سلام {fullName} عزیز 👋
@@ -54,6 +74,7 @@ export default function DashHome() {
         </p>
       </div>
 
+      {/* کارت پروفایل */}
       <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl shadow-md flex flex-col lg:flex-row items-center lg:items-start gap-6 relative">
         <div className="flex-shrink-0">
           <Image
@@ -101,7 +122,7 @@ export default function DashHome() {
             </li>
           </ul>
 
-          <div className="mt-4">
+          <div className="mt-4 flex gap-2 flex-wrap">
             <button
               onClick={() => setShowModal(true)}
               className="flex items-center gap-2 px-2 text-xs py-1 cursor-pointer bg-[#49C5B6] hover:bg-[#31CCBA] text-white font-medium rounded shadow-lg transition transform hover:scale-105"
@@ -109,108 +130,165 @@ export default function DashHome() {
               <FaEdit />
               ویرایش اطلاعات
             </button>
+
+            <button
+              onClick={() => setShowPasswordModal(true)}
+              className="flex items-center gap-2 px-2 text-xs py-1 cursor-pointer bg-yellow-500 hover:bg-yellow-400 text-white font-medium rounded shadow-lg transition transform hover:scale-105"
+            >
+              <FaKey />
+              تغییر رمز عبور
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Modal ویرایش */}
-      {showModal && (
-        <div className="fixed inset-0 z-[99999] lg:mt-20 flex items-center justify-center bg-black/60 overflow-y-auto">
+      {/* --- Modal تغییر رمز عبور --- */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60">
           <div
             className={`bg-gray-900 rounded-2xl p-6 shadow-2xl max-w-sm w-full text-right transform transition-all duration-200 ${
+              animatePasswordModal
+                ? "opacity-100 scale-100"
+                : "opacity-0 scale-90"
+            }`}
+          >
+            <h2 className="text-xs md:text-sm font-medium text-white mb-4 text-center">
+              تغییر رمز عبور
+            </h2>
+
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="رمز عبور جدید"
+              className="w-full p-2 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-yellow-500 text-xs md:text-sm font-medium"
+            />
+
+            <div className="flex justify-center gap-4 mt-6">
+              <button
+                onClick={handlePasswordChange}
+                className="px-3 text-xs md:text-sm font-medium py-2 cursor-pointer rounded-lg bg-yellow-500 hover:bg-yellow-400 text-white transition shadow-lg"
+              >
+                تغییر
+              </button>
+              <button
+                onClick={() => setShowPasswordModal(false)}
+                className="px-3 text-xs md:text-sm font-medium py-2 cursor-pointer rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition"
+              >
+                انصراف
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- Modal ویرایش اطلاعات (مثل قبل) --- */}
+      {showModal && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 overflow-y-auto">
+          <div
+            className={`bg-gray-900 rounded-2xl p-6 shadow-2xl mt-10 overflow-y-auto max-w-sm w-full text-right transform transition-all duration-200 ${
               animateModal ? "opacity-100 scale-100" : "opacity-0 scale-90"
             }`}
           >
             <div className="flex justify-center mb-4 relative">
+              {" "}
               <Image
                 src={photo}
                 alt="تصویر کاربر"
                 width={100}
                 height={100}
                 className="rounded-full border-2 border-[#49C5B6]"
-              />
+              />{" "}
               <label className="absolute bottom-0 right-0 bg-[#49C5B6] text-white rounded-full p-2 cursor-pointer hover:bg-[#31CCBA]">
-                <FaCamera />
+                {" "}
+                <FaCamera />{" "}
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handlePhotoChange}
                   className="hidden"
-                />
-              </label>
-            </div>
-
+                />{" "}
+              </label>{" "}
+            </div>{" "}
             <h2 className="text-xs md:text-sm font-medium text-white mb-4 text-center">
-              ویرایش اطلاعات
-            </h2>
-
+              {" "}
+              ویرایش اطلاعات{" "}
+            </h2>{" "}
             <div className="flex flex-col gap-4 text-right text-gray-200">
-              {/* نام و نام خانوادگی */}
+              {" "}
+              {/* نام و نام خانوادگی */}{" "}
               <div className="flex flex-col">
+                {" "}
                 <label className="mb-1 flex items-center gap-2 text-10 md:text-xs font-medium">
-                  <FaIdCard className="text-[#49C5B6]" /> نام و نام خانوادگی
-                </label>
+                  {" "}
+                  <FaIdCard className="text-[#49C5B6]" /> نام و نام خانوادگی{" "}
+                </label>{" "}
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   className="p-2 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-[#49C5B6] text-xs md:text-sm font-medium"
-                />
-              </div>
-
-              {/* نام کاربری */}
+                />{" "}
+              </div>{" "}
+              {/* نام کاربری */}{" "}
               <div className="flex flex-col">
+                {" "}
                 <label className="mb-1 flex items-center gap-2 text-[10px] md:text-xs font-medium">
-                  <FaUser className="text-[#49C5B6]" /> نام کاربری
-                </label>
+                  {" "}
+                  <FaUser className="text-[#49C5B6]" /> نام کاربری{" "}
+                </label>{" "}
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="p-2 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-[#49C5B6] text-xs md:text-sm font-medium"
-                />
-              </div>
-
-              {/* شماره تماس */}
+                />{" "}
+              </div>{" "}
+              {/* شماره تماس */}{" "}
               <div className="flex flex-col">
+                {" "}
                 <label className="mb-1 flex items-center gap-2 text-[10px] md:text-xs font-medium">
-                  <FaPhone className="text-[#49C5B6]" /> شماره تماس
-                </label>
+                  {" "}
+                  <FaPhone className="text-[#49C5B6]" /> شماره تماس{" "}
+                </label>{" "}
                 <input
                   type="text"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="p-2 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-[#49C5B6] text-xs md:text-sm font-medium"
-                />
-              </div>
-
-              {/* ایمیل */}
+                />{" "}
+              </div>{" "}
+              {/* ایمیل */}{" "}
               <div className="flex flex-col">
+                {" "}
                 <label className="mb-1 flex items-center gap-2 text-[10px] md:text-xs font-medium">
-                  <FaEnvelope className="text-[#49C5B6]" /> ایمیل
-                </label>
+                  {" "}
+                  <FaEnvelope className="text-[#49C5B6]" /> ایمیل{" "}
+                </label>{" "}
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="p-2 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-[#49C5B6] text-xs md:text-sm font-medium"
-                />
+                />{" "}
+              </div>{" "}
+              <div className="flex justify-end gap-4 mt-6">
+                {" "}
+                <button
+                  onClick={handleSave}
+                  className="px-3 text-xs md:text-sm font-medium py-2 cursor-pointer rounded-lg bg-[#49C5B6] hover:bg-[#31CCBA] text-white transition shadow-lg"
+                >
+                  {" "}
+                  ذخیره{" "}
+                </button>{" "}
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="px-3 text-xs md:text-sm font-medium py-2 cursor-pointer rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition"
+                >
+                  {" "}
+                  انصراف{" "}
+                </button>{" "}
               </div>
-            </div>
-
-            <div className="flex justify-center gap-4 mt-6">
-              <button
-                onClick={handleSave}
-                className="px-3 text-xs md:text-sm font-medium py-2 cursor-pointer rounded-lg bg-[#49C5B6] hover:bg-[#31CCBA] text-white transition shadow-lg"
-              >
-                ذخیره
-              </button>
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-3 text-xs md:text-sm font-medium py-2 cursor-pointer rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition"
-              >
-                انصراف
-              </button>
             </div>
           </div>
         </div>

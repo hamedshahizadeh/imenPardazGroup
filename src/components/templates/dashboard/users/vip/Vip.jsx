@@ -115,7 +115,7 @@ export default function VIPUsers() {
   };
 
   return (
-    <div className="space-y-6 p-4">
+    <div className="space-y-6 container">
       {/* هدر */}
       <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl shadow-md flex flex-col md:flex-row items-center gap-4 font-medium">
         <h1 className="text-gray-200 text-sm md:text-base">

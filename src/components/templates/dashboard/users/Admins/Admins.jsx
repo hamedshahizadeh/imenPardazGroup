@@ -128,7 +128,7 @@ export default function Admins() {
     "w-full p-2 rounded-md text-gray-200 bg-black/30 border border-gray-600 text-xs md:text-sm font-medium";
 
   return (
-    <div className="space-y-6 p-4">
+    <div className="space-y-6 container">
       {/* مالک */}
       <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl shadow-md flex flex-col md:flex-row items-center gap-4">
         <div className="flex items-center gap-4">

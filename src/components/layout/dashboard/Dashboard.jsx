@@ -19,7 +19,7 @@ import {
   FaStar,
   FaUser,
   FaChevronDown,
-  FaCommentDots
+  FaCommentDots,
 } from "react-icons/fa";
 
 export default function DashboardLayout({ children }) {
@@ -117,7 +117,7 @@ export default function DashboardLayout({ children }) {
                 {/* سازمان‌ها */}
                 <li>
                   <Link
-                    href="/dashboard/site-management/organizations"
+                    href="/dashboard/organizations"
                     onClick={() => setMenuOpen(false)}
                     className="flex items-center gap-2 text-xs md:text-sm font-sans font-medium 
                bg-white/5 hover:bg-white/15 rounded-lg px-3 py-2 
@@ -131,7 +131,7 @@ export default function DashboardLayout({ children }) {
                 {/* نظرات مشتریان */}
                 <li>
                   <Link
-                    href="/dashboard/site-management/customer-reviews"
+                    href="/dashboard/customer-reviews"
                     onClick={() => setMenuOpen(false)}
                     className="flex items-center gap-2 text-xs md:text-sm font-sans font-medium 
                bg-white/5 hover:bg-white/15 rounded-lg px-3 py-2 
@@ -269,7 +269,7 @@ export default function DashboardLayout({ children }) {
           {/* کامنت‌های من */}
           <li>
             <Link
-              href="/dashboard/my-comments"
+              href="/dashboard/mycomment"
               onClick={() => setMenuOpen(false)}
               className="flex items-center gap-3 text-xs md:text-sm font-sans font-medium 
            bg-white/10 hover:bg-white/20 rounded-xl px-3 py-2 

@@ -95,7 +95,13 @@ export default function VideosPage() {
       setCategories([...categories, newVideo.category]);
     }
 
-    setNewVideo({ title: "", description: "", video: null, poster: null, category: "" });
+    setNewVideo({
+      title: "",
+      description: "",
+      video: null,
+      poster: null,
+      category: "",
+    });
     setNewCategory("");
     setShowAddModal(false);
     toast.success("ویدیو با موفقیت افزوده شد");
@@ -146,7 +152,7 @@ export default function VideosPage() {
   };
 
   return (
-    <div className="p-4 text-gray-200 min-h-screen">
+    <div className=" text-gray-200 min-h-screen container">
       {/* دکمه افزودن */}
       <div className="flex justify-end mb-4">
         <button
@@ -162,19 +168,29 @@ export default function VideosPage() {
         {videos.map((card) => (
           <article
             key={card.id}
-            className="bg-white/5 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden flex flex-col h-80"
+            className="bg-black/60 backdrop-blur-lg rounded-xl shadow-lg overflow-hidden flex flex-col h-80"
           >
             <div className="relative w-full h-52">
-              <video className="w-full h-52 object-cover" poster={card.poster} controls>
+              <video
+                className="w-full h-52 object-cover"
+                poster={card.poster}
+                controls
+              >
                 <source src={card.video} type="video/mp4" />
                 مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند.
               </video>
             </div>
             <div className="flex-1 p-4 flex flex-col">
-              <h3 className="text-gray-200 font-medium text-sm mb-2">{card.title}</h3>
-              <p className="text-gray-400 text-xs font-medium text-justify line-clamp-3 mb-4">{card.description}</p>
+              <h3 className="text-gray-200 font-medium text-sm mb-1">
+                {card.title}
+              </h3>
+              <p className="text-gray-400 text-xs font-medium text-justify line-clamp-3 mb-2">
+                {card.description}
+              </p>
               <div className="flex items-center justify-between mt-auto">
-                <span className="text-[10px] text-[#49C5B6] font-medium">{card.category}</span>
+                <span className="text-[10px] text-[#49C5B6] font-medium">
+                  {card.category}
+                </span>
                 <div className="flex gap-2">
                   <button
                     onClick={() => {
@@ -203,14 +219,14 @@ export default function VideosPage() {
 
       {/* مودال افزودن ویدیو */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-y-auto">
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800/10 backdrop-blur-xs z-50 overflow-y-auto">
           <div
             className={`bg-gray-900/95 backdrop-blur-xl rounded-t-3xl p-6 w-full max-w-md
               transform transition-transform duration-300
               ${animateAddModal ? "translate-y-0" : "translate-y-full"}
               max-h-[90vh] overflow-y-auto`}
           >
-            <h2 className="text-lg font-medium mb-4 text-white text-center flex items-center justify-center gap-2">
+            <h2 className="text-xs md:text-sm font-medium text-white mb-2 md:mb-4 text-center">
               <FaVideo className="text-[#49C5B6]" /> افزودن ویدیو جدید
             </h2>
 
@@ -219,14 +235,18 @@ export default function VideosPage() {
                 type="text"
                 placeholder="عنوان ویدیو"
                 value={newVideo.title}
-                onChange={(e) => setNewVideo({ ...newVideo, title: e.target.value })}
-                className="p-2 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-[#49C5B6]"
+                onChange={(e) =>
+                  setNewVideo({ ...newVideo, title: e.target.value })
+                }
+                className="w-full border border-gray-600 rounded px-2 py-1 bg-gray-900 text-gray-200 text-xs md:text-sm focus:ring-2 focus:ring-[#49C5B6]"
               />
               <textarea
                 placeholder="توضیحات"
                 value={newVideo.description}
-                onChange={(e) => setNewVideo({ ...newVideo, description: e.target.value })}
-                className="p-2 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-[#49C5B6] h-20"
+                onChange={(e) =>
+                  setNewVideo({ ...newVideo, description: e.target.value })
+                }
+                className="w-full border border-gray-600 rounded px-2 py-1 bg-gray-900 text-gray-200 text-xs md:text-sm focus:ring-2 focus:ring-[#49C5B6] h-20"
               />
 
               {/* فایل ویدیو */}
@@ -239,7 +259,7 @@ export default function VideosPage() {
                     const file = e.target.files[0];
                     if (file) setNewVideo({ ...newVideo, video: file });
                   }}
-                  className="p-2 rounded-lg bg-gray-800 text-white"
+                  className="w-full border border-gray-600 rounded px-2 py-1 bg-gray-900 text-gray-200 text-xs md:text-sm"
                 />
                 {newVideo.video && (
                   <video
@@ -260,7 +280,7 @@ export default function VideosPage() {
                     const file = e.target.files[0];
                     if (file) setNewVideo({ ...newVideo, poster: file });
                   }}
-                  className="p-2 rounded-lg bg-gray-800 text-white"
+                  className="w-full border border-gray-600 rounded px-2 py-1 bg-gray-900 text-gray-200 text-xs md:text-sm"
                 />
                 {newVideo.poster && (
                   <img
@@ -275,18 +295,22 @@ export default function VideosPage() {
               <div className="flex items-center gap-2">
                 <select
                   value={newVideo.category}
-                  onChange={(e) => setNewVideo({ ...newVideo, category: e.target.value })}
-                  className="flex-1 p-2 rounded-lg bg-gray-800 text-white"
+                  onChange={(e) =>
+                    setNewVideo({ ...newVideo, category: e.target.value })
+                  }
+                  className="w-full border border-gray-600 rounded px-2 py-1 bg-gray-900 text-gray-200 text-xs md:text-sm"
                 >
                   <option value="">انتخاب دسته‌بندی</option>
                   {categories.map((c, i) => (
-                    <option key={i} value={c}>{c}</option>
+                    <option key={i} value={c}>
+                      {c}
+                    </option>
                   ))}
                 </select>
 
                 <button
                   onClick={() => setShowCategoryModal(true)}
-                  className="p-2 bg-[#49C5B6]/30 hover:bg-[#31CCBA] rounded-lg text-white text-sm"
+                  className="p-2 bg-[#49C5B6]/30 hover:bg-[#31CCBA] rounded-lg text-white text-xs cursor-pointer"
                 >
                   <FaPlus />
                 </button>
@@ -303,7 +327,13 @@ export default function VideosPage() {
               <button
                 onClick={() => {
                   setShowAddModal(false);
-                  setNewVideo({ title: "", description: "", video: null, poster: null, category: "" });
+                  setNewVideo({
+                    title: "",
+                    description: "",
+                    video: null,
+                    poster: null,
+                    category: "",
+                  });
                   setNewCategory("");
                 }}
                 className="px-3 py-2 text-xs md:text-sm font-medium cursor-pointer rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition"
@@ -315,158 +345,166 @@ export default function VideosPage() {
         </div>
       )}
 
-
-{/* مودال حذف ویدیو */}
-{showDeleteModal && videoToDelete && (
-  <div className="fixed inset-0 flex items-center justify-center bg-gray-800/10 backdrop-blur-xs z-50">
-    <div className="bg-gray-900/90 backdrop-blur-xs rounded-2xl p-6 shadow-lg max-w-sm w-full text-center">
-      <h2 className="text-xs md:text-sm font-medium text-white mb-2 md:mb-4">
-        آیا مطمئن هستید که می‌خواهید ویدیو
-      </h2>
-      <span className="mb-6 text-[#49C5B6]">{videoToDelete.title}</span>
-      را حذف کنید؟
-      <div className="flex justify-center gap-4 mt-2 md:mt-3 lg:mt-4">
-        <button
-          onClick={handleDeleteVideo}
-          className="px-3 py-2 text-xs md:text-sm font-medium cursor-pointer rounded-lg bg-red-600 hover:bg-red-700 text-white transition"
-        >
-          حذف
-        </button>
-        <button
-          onClick={() => setShowDeleteModal(false)}
-          className="px-3 py-2 text-xs md:text-sm font-medium cursor-pointer rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition"
-        >
-          بستن
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-{/* مودال ویرایش ویدیو */}
-{showEditModal && videoToEdit && (
-  <div className="fixed inset-0 flex items-center justify-center bg-gray-800/10 backdrop-blur-xs z-50">
-    <div className="bg-gray-900/90 backdrop-blur-xs rounded-2xl p-6 shadow-lg max-w-sm w-full">
-      <h2 className="text-xs md:text-sm font-medium text-white mb-2 md:mb-4 text-center">
-        ویرایش ویدیو
-      </h2>
-
-      <div className="flex flex-col gap-3 text-xs md:text-sm font-medium text-gray-200 mb-2 md:mb-4">
-        {/* عنوان */}
-        <label>
-          عنوان:
-          <input
-            type="text"
-            value={videoToEdit.title}
-            onChange={(e) =>
-              setVideoToEdit({ ...videoToEdit, title: e.target.value })
-            }
-            className="w-full border border-gray-600 rounded px-2 py-1 bg-gray-900 text-gray-200 text-xs md:text-sm"
-          />
-        </label>
-
-        {/* توضیحات */}
-        <label>
-          توضیحات:
-          <textarea
-            value={videoToEdit.description}
-            onChange={(e) =>
-              setVideoToEdit({ ...videoToEdit, description: e.target.value })
-            }
-            className="w-full border border-gray-600 rounded px-2 py-1 bg-gray-900 text-gray-200 text-xs md:text-sm"
-          />
-        </label>
-
-        {/* پوستر */}
-        <label>
-          پوستر ویدیو:
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files[0];
-              if (file) setVideoToEdit({ ...videoToEdit, poster: file });
-            }}
-            className="w-full border border-gray-600 rounded px-2 py-1 bg-gray-900 text-white"
-          />
-        </label>
-        {videoToEdit.poster && typeof videoToEdit.poster !== "string" && (
-          <img
-            src={URL.createObjectURL(videoToEdit.poster)}
-            alt="پیش‌نمایش پوستر"
-            className="w-20 h-20 rounded object-cover mx-auto border-2 border-[#49C5B6]"
-          />
-        )}
-
-        {/* ویدیو */}
-        <label>
-          ویدیو:
-          <input
-            type="file"
-            accept="video/*"
-            onChange={(e) => {
-              const file = e.target.files[0];
-              if (file) setVideoToEdit({ ...videoToEdit, video: file });
-            }}
-            className="w-full border border-gray-600 rounded px-2 py-1 bg-gray-900 text-white"
-          />
-        </label>
-        {videoToEdit.video && typeof videoToEdit.video !== "string" && (
-          <video
-            src={URL.createObjectURL(videoToEdit.video)}
-            controls
-            className="w-full h-32 mt-2 rounded bg-gray-700"
-          />
-        )}
-
-        {/* دسته‌بندی */}
-        <div className="flex items-center gap-2">
-          <select
-            value={videoToEdit.category}
-            onChange={(e) =>
-              setVideoToEdit({ ...videoToEdit, category: e.target.value })
-            }
-            className="flex-1 p-2 rounded-lg bg-gray-800 text-white"
-          >
-            <option value="">انتخاب دسته‌بندی</option>
-            {categories.map((c, i) => (
-              <option key={i} value={c}>{c}</option>
-            ))}
-          </select>
-
-          {/* دکمه افزودن دسته‌بندی جدید */}
-          <button
-            onClick={() => setShowCategoryModal(true)}
-            className="p-2 bg-[#49C5B6]/30 hover:bg-[#31CCBA] rounded-lg text-white text-sm"
-          >
-            <FaPlus />
-          </button>
+      {/* مودال حذف ویدیو */}
+      {showDeleteModal && videoToDelete && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800/10 backdrop-blur-xs z-50">
+          <div className="bg-gray-900/90 backdrop-blur-xs rounded-2xl p-6 shadow-lg max-w-sm w-full text-center">
+            <h2 className="text-xs md:text-sm font-medium text-white mb-2 md:mb-4">
+              آیا مطمئن هستید که می‌خواهید ویدیو
+            </h2>
+            <span className="mb-6 text-[#49C5B6]">{videoToDelete.title}</span>
+            را حذف کنید؟
+            <div className="flex justify-center gap-4 mt-2 md:mt-3 lg:mt-4">
+              <button
+                onClick={handleDeleteVideo}
+                className="px-3 py-2 text-xs md:text-sm font-medium cursor-pointer rounded-lg bg-red-600 hover:bg-red-700 text-white transition"
+              >
+                حذف
+              </button>
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-3 py-2 text-xs md:text-sm font-medium cursor-pointer rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition"
+              >
+                بستن
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
+      {/* مودال ویرایش ویدیو */}
+      {showEditModal && videoToEdit && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800/10 backdrop-blur-xs z-50 overflow-y-auto">
+          <div className="bg-gray-900/90 backdrop-blur-xs rounded-2xl p-6 shadow-lg max-w-sm w-full">
+            <h2 className="text-xs md:text-sm font-medium text-white mb-2 md:mb-4 text-center">
+              ویرایش ویدیو
+            </h2>
 
-      <div className="flex justify-end gap-4 mt-4">
-        <button
-          onClick={handleEditVideo}
-          className="bg-blue-600 text-white text-[10px] md:text-xs px-2 py-1 cursor-pointer rounded hover:bg-blue-700"
-        >
-          ذخیره
-        </button>
-        <button
-          onClick={() => setShowEditModal(false)}
-          className="px-3 py-2 text-xs md:text-sm font-medium cursor-pointer rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition"
-        >
-          بستن
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+            <div className="flex flex-col gap-3 text-xs md:text-sm font-medium text-gray-200 mb-2 md:mb-4">
+              {/* عنوان */}
+              <label>
+                عنوان:
+                <input
+                  type="text"
+                  value={videoToEdit.title}
+                  onChange={(e) =>
+                    setVideoToEdit({ ...videoToEdit, title: e.target.value })
+                  }
+                  className="w-full border border-gray-600 rounded px-2 py-1 bg-gray-900 text-gray-200 text-xs md:text-sm"
+                />
+              </label>
+
+              {/* توضیحات */}
+              <label>
+                توضیحات:
+                <textarea
+                  value={videoToEdit.description}
+                  onChange={(e) =>
+                    setVideoToEdit({
+                      ...videoToEdit,
+                      description: e.target.value,
+                    })
+                  }
+                  className="w-full border border-gray-600 rounded px-2 py-1 bg-gray-900 text-gray-200 text-xs md:text-sm"
+                />
+              </label>
+
+              {/* پوستر */}
+              <label>
+                پوستر ویدیو:
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) setVideoToEdit({ ...videoToEdit, poster: file });
+                  }}
+                  className="w-full border border-gray-600 rounded px-2 py-1 bg-gray-900 text-white"
+                />
+              </label>
+              {videoToEdit.poster && typeof videoToEdit.poster !== "string" && (
+                <img
+                  src={URL.createObjectURL(videoToEdit.poster)}
+                  alt="پیش‌نمایش پوستر"
+                  className="w-20 h-20 rounded object-cover mx-auto border-2 border-[#49C5B6]"
+                />
+              )}
+
+              {/* ویدیو */}
+              <label>
+                ویدیو:
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) setVideoToEdit({ ...videoToEdit, video: file });
+                  }}
+                  className="w-full border border-gray-600 rounded px-2 py-1 bg-gray-900 text-white"
+                />
+              </label>
+              {videoToEdit.video && typeof videoToEdit.video !== "string" && (
+                <video
+                  src={URL.createObjectURL(videoToEdit.video)}
+                  controls
+                  className="w-full h-32 mt-2 rounded bg-gray-700"
+                />
+              )}
+
+              {/* دسته‌بندی */}
+              <div className="flex items-center gap-2">
+                <select
+                  value={videoToEdit.category}
+                  onChange={(e) =>
+                    setVideoToEdit({ ...videoToEdit, category: e.target.value })
+                  }
+                  className="flex-1 p-2 rounded-lg bg-gray-800 text-white"
+                >
+                  <option value="">انتخاب دسته‌بندی</option>
+                  {categories.map((c, i) => (
+                    <option key={i} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+
+                {/* دکمه افزودن دسته‌بندی جدید */}
+                <button
+                  onClick={() => setShowCategoryModal(true)}
+                  className="p-2 bg-[#49C5B6]/30 hover:bg-[#31CCBA] rounded-lg text-white text-sm cursor-pointer"
+                >
+                  <FaPlus />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-4 mt-4">
+              <button
+                onClick={handleEditVideo}
+                className="bg-blue-600 text-white text-[10px] md:text-xs px-2 py-1 cursor-pointer rounded hover:bg-blue-700"
+              >
+                ذخیره
+              </button>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="px-3 py-2 text-xs md:text-sm font-medium cursor-pointer rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition"
+              >
+                بستن
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* مودال دسته‌بندی جدید */}
       {showCategoryModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div
             className={`bg-gray-900/95 backdrop-blur-xl rounded-xl p-6 w-full max-w-xs transform transition-all duration-200
-              ${animateCategoryModal ? "opacity-100 scale-100" : "opacity-0 scale-90"}`}
+              ${
+                animateCategoryModal
+                  ? "opacity-100 scale-100"
+                  : "opacity-0 scale-90"
+              }`}
           >
             <h2 className="text-white text-center mb-4 font-medium text-sm flex items-center justify-center gap-2">
               <FaFolderPlus className="text-[#49C5B6]" /> افزودن دسته‌بندی جدید
@@ -476,12 +514,12 @@ export default function VideosPage() {
               placeholder="نام دسته‌بندی"
               value={newCategory}
               onChange={(e) => setNewCategory(e.target.value)}
-              className="w-full p-2 rounded-lg bg-gray-800 text-white mb-4"
+              className="w-full p-2 rounded-lg bg-gray-800 text-white mb-4 text-sm font-medium"
             />
             <div className="flex justify-end gap-3">
               <button
                 onClick={handleAddCategory}
-                className="px-3 py-2 bg-[#49C5B6] hover:bg-[#31CCBA] rounded-lg text-white text-sm"
+                className="px-3 py-2 bg-[#49C5B6] cursor-pointer hover:bg-[#31CCBA] rounded-lg text-white text-sm"
               >
                 افزودن
               </button>
@@ -490,7 +528,7 @@ export default function VideosPage() {
                   setShowCategoryModal(false);
                   setNewCategory("");
                 }}
-                className="px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-gray-200 text-sm"
+                className="px-3 py-2 bg-gray-700 hover:bg-gray-600 cursor-pointer rounded-lg text-gray-200 text-sm"
               >
                 لغو
               </button>

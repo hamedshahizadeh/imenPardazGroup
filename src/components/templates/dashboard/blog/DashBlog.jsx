@@ -106,8 +106,7 @@ export default function DashBlog() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* دکمه ساخت */}
+    <div className="space-y-6 container">
       <div className="flex justify-end">
         <button
           onClick={handleNewBlog}
@@ -167,7 +166,7 @@ export default function DashBlog() {
       {showFormModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-3 mt-20 mb-14">
           <div
-            className="bg-white/10 backdrop-blur-lg px-3 py-2 rounded-2xl shadow-lg w-full max-w-md 
+            className="bg-white/10 backdrop-blur-lg px-3 py-2 rounded-2xl shadow-lg w-full max-w-xl 
                     space-y-2 max-h-[90vh] overflow-y-auto my-[10px]"
           >
             <h2 className="text-center text-sm md:text-base font-bold text-[#49C5B6] mb-4">
