@@ -9,7 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "multer": "^2.0.2",
     "next": "15.5.3",
+    "next-connect": "^1.0.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hot-toast": "^2.6.0",

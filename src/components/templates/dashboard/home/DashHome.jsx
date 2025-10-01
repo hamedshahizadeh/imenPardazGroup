@@ -76,15 +76,7 @@ export default function DashHome() {
 
       {/* کارت پروفایل */}
       <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl shadow-md flex flex-col lg:flex-row items-center lg:items-start gap-6 relative">
-        <div className="flex-shrink-0">
-          <Image
-            src={photo}
-            alt="تصویر کاربر"
-            width={120}
-            height={120}
-            className="rounded-full border-2 border-[#49C5B6]"
-          />
-        </div>
+       
 
         <div className="flex-1 w-full">
           <h2 className="text-lg md:text-xl font-semibold flex items-center gap-2 mb-4">
@@ -190,26 +182,6 @@ export default function DashHome() {
               animateModal ? "opacity-100 scale-100" : "opacity-0 scale-90"
             }`}
           >
-            <div className="flex justify-center mb-4 relative">
-              {" "}
-              <Image
-                src={photo}
-                alt="تصویر کاربر"
-                width={100}
-                height={100}
-                className="rounded-full border-2 border-[#49C5B6]"
-              />{" "}
-              <label className="absolute bottom-0 right-0 bg-[#49C5B6] text-white rounded-full p-2 cursor-pointer hover:bg-[#31CCBA]">
-                {" "}
-                <FaCamera />{" "}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoChange}
-                  className="hidden"
-                />{" "}
-              </label>{" "}
-            </div>{" "}
             <h2 className="text-xs md:text-sm font-medium text-white mb-4 text-center">
               {" "}
               ویرایش اطلاعات{" "}

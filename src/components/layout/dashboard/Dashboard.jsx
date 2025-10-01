@@ -72,6 +72,7 @@ export default function DashboardLayout({ children }) {
             <Image
               src="/images/user.jpeg"
               width={300}
+              priority
               height={300}
               alt="عکس پرسنلی"
               className="rounded-full w-12 h-12 md:w-14 md:h-14 border-2 border-[#49C5B6]"
