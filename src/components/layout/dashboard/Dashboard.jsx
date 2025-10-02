@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AnimatedBackground from "@/components/modules/homePage/bgsec1";
+import { useUser } from "../../../../context/UserContext";
+import { signOut } from "next-auth/react"; // دقت کن از این بیار
 
 import {
   FaBars,
@@ -27,14 +29,14 @@ export default function DashboardLayout({ children }) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [siteMenuOpen, setSiteMenuOpen] = useState(false);
-
+  const user = useUser();
   const router = useRouter();
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setShowModal(false);
+    await signOut({ redirect: false }); // کوکی و سشن پاک میشه
     toast.success("خروج شما با موفقیت انجام شد");
-    router.push("/");
-    // اینجا میتونی ریدایرکت کنی مثلا:
-    // router.push("/logout") یا API لاگ اوت بزنی
+    router.replace("/");
+    router.refresh();
   };
 
   return (
@@ -79,7 +81,14 @@ export default function DashboardLayout({ children }) {
             />
           </div>
           <p className="text-center font-medium text-[10px] md:text-xs mt-1 md:mt-2 text-gray-200">
-            حامد شاهی زاده
+            {user?.name}
+          </p>
+          <p className="text-center text-[10px] md:text-xs text-gray-400 font-light">
+            {user?.role === "USER"
+              ? "کاربر عادی"
+              : user?.role === "ADMIN"
+              ? "مدیر"
+              : "بدون نقش"}
           </p>
         </div>
         <ul className="space-y-2 mt-4 ">

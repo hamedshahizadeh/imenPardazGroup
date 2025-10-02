@@ -6,11 +6,13 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { signIn } from "next-auth/react";
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
- const router = useRouter();
-  const handleLogin = (e) => {
+  const router = useRouter();
+  const handleLogin = async (e) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -18,17 +20,21 @@ export default function LoginPage() {
       return;
     }
 
-    // مثال ساده ورود موفق
-    if (email === "test@test.com" && password === "123456") {
-    toast.success("ورود موفقیت‌آمیز بود!");
+    const res = await signIn("credentials", {
+      email: email,
+      password: password,
+      redirect: false,
+    });
+
+    if (res.code) {
+      toast.error(res.code);
+    } else {
+      router.push("/dashboard");
+      router.refresh();
+      toast.success("شما با موفقیت وارد شدید");
       setEmail("");
       setPassword("");
-      router.push("/dashboard"); // هدایت به صفحه داشبورد
-    } else {
-      toast.error("ایمیل یا رمز عبور اشتباه است!");
     }
-    setEmail("");
-    setPassword("");
   };
 
   return (
@@ -48,7 +54,7 @@ export default function LoginPage() {
                 size={14}
               />
               <input
-                type="email"
+                type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="ایمیل خود را وارد کنید"
@@ -71,7 +77,6 @@ export default function LoginPage() {
               />
             </div>
 
-        
             <button
               type="submit"
               className="w-full text-sm  cursor-pointer flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold transition shadow-md"
@@ -95,7 +100,10 @@ export default function LoginPage() {
 
           <p className="text-center text-gray-400 mt-6 text-sm">
             حساب کاربری ندارید؟{" "}
-            <Link href="/auth/register" className="text-cyan-400 hover:underline">
+            <Link
+              href="/auth/register"
+              className="text-cyan-400 hover:underline"
+            >
               ثبت نام کنید
             </Link>
           </p>

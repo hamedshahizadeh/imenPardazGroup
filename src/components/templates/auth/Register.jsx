@@ -1,25 +1,41 @@
-"use client"
+"use client";
 import AnimatedBackground from "@/components/modules/homePage/bgsec1";
 import { useState } from "react";
-import { FaUser, FaEnvelope, FaLock, FaSignInAlt, FaPhone } from "react-icons/fa";
+import {
+  FaUser,
+  FaEnvelope,
+  FaLock,
+  FaSignInAlt,
+  FaPhone,
+} from "react-icons/fa";
 import toast from "react-hot-toast";
 import Link from "next/link";
-
+import { useRouter } from "next/navigation";
 export default function Register() {
-  const [username, setUsername] = useState("");
-  const [emailOrUsername, setEmailOrUsername] = useState("");
+  const [name, setUsername] = useState("");
+  const [email, setEmailOrUsername] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
-  const handleRegister = (e) => {
+  const router = useRouter();
+  const handleRegister = async (e) => {
     e.preventDefault();
 
-    if (!username || !emailOrUsername || !phone || !password || !confirmPassword) {
+    if (!name || !email || !phone || !password || !confirmPassword) {
       toast.error("لطفاً همه فیلدها را پر کنید!");
       return;
     }
+// شرط برای username
+if (name.length < 8 ) {
+  toast.error("نام کاربری باید حداقل 8 کاراکتر باشد !");
+  return;
+}
 
+// شرط برای password
+if (password.length < 6 || !/[A-Z]/.test(password)) {
+  toast.error("رمز عبور باید حداقل 6 کاراکتر باشد و حداقل یک حرف بزرگ انگلیسی داشته باشد!");
+  return;
+}
     // شرط شماره تلفن
     const phoneRegex = /^09\d{9}$/;
     if (!phoneRegex.test(phone)) {
@@ -31,17 +47,30 @@ export default function Register() {
       toast.error("رمز عبور و تکرار آن مطابقت ندارند!");
       return;
     }
-
-    toast.success(`ثبت‌نام با موفقیت انجام شد، ${username}! 🎉`);
-
-    // ریست کردن فیلدها
-    setUsername("");
-    setEmailOrUsername("");
-    setPhone("");
-    setPassword("");
-    setConfirmPassword("");
+    const res = await fetch("/api/auth/signup", {
+      method: "POST",
+      body: JSON.stringify({
+        name,
+        email,
+        phone,
+        password,
+      }),
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json();
+    if (res.status === 200) {
+      router.push("/auth/login");
+      // ریست کردن فیلدها
+      setUsername("");
+      setEmailOrUsername("");
+      setPhone("");
+      setPassword("");
+      setConfirmPassword("");
+      toast.success(data.message);
+    } else {
+      toast.error(data.error);
+    }
   };
-
   return (
     <div className="relative bg-gray-950">
       <AnimatedBackground />
@@ -54,10 +83,13 @@ export default function Register() {
           <form onSubmit={handleRegister} className="space-y-4">
             {/* نام کامل */}
             <div className="relative">
-              <FaUser className="absolute right-3 top-3 text-gray-400" size={14} />
+              <FaUser
+                className="absolute right-3 top-3 text-gray-400"
+                size={14}
+              />
               <input
                 type="text"
-                value={username}
+                value={name}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="نام کامل"
                 className="w-full pl-3 pr-8 py-2 text-sm rounded-xl bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 placeholder-gray-400 transition"
@@ -66,10 +98,13 @@ export default function Register() {
 
             {/* ایمیل یا نام کاربری */}
             <div className="relative">
-              <FaEnvelope className="absolute right-3 top-3 text-gray-400" size={14} />
+              <FaEnvelope
+                className="absolute right-3 top-3 text-gray-400"
+                size={14}
+              />
               <input
                 type="text"
-                value={emailOrUsername}
+                value={email}
                 onChange={(e) => setEmailOrUsername(e.target.value)}
                 placeholder="ایمیل یا نام کاربری"
                 className="w-full pl-3 pr-8 text-sm py-2 rounded-xl bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 placeholder-gray-400 transition"
@@ -78,7 +113,10 @@ export default function Register() {
 
             {/* شماره تلفن */}
             <div className="relative">
-              <FaPhone className="absolute right-3 top-3 text-gray-400" size={14} />
+              <FaPhone
+                className="absolute right-3 top-3 text-gray-400"
+                size={14}
+              />
               <input
                 type="text"
                 value={phone}
@@ -90,7 +128,10 @@ export default function Register() {
 
             {/* رمز عبور */}
             <div className="relative">
-              <FaLock className="absolute right-3 top-3 text-gray-400" size={14} />
+              <FaLock
+                className="absolute right-3 top-3 text-gray-400"
+                size={14}
+              />
               <input
                 type="password"
                 value={password}
@@ -102,7 +143,10 @@ export default function Register() {
 
             {/* تکرار رمز عبور */}
             <div className="relative">
-              <FaLock className="absolute right-3 top-3 text-gray-400" size={14} />
+              <FaLock
+                className="absolute right-3 top-3 text-gray-400"
+                size={14}
+              />
               <input
                 type="password"
                 value={confirmPassword}

@@ -10,8 +10,8 @@ import {
   FaIdCard,
   FaKey,
 } from "react-icons/fa";
-import Image from "next/image";
 import toast from "react-hot-toast";
+import { useUser } from "../../../../../context/UserContext";
 
 export default function DashHome() {
   const [showModal, setShowModal] = useState(false);
@@ -19,15 +19,12 @@ export default function DashHome() {
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [animatePasswordModal, setAnimatePasswordModal] = useState(false);
+  const user = useUser();
   const [newPassword, setNewPassword] = useState("");
 
-  const [username, setUsername] = useState("hamedshahizadeh");
-  const [fullName, setFullName] = useState("حامد شاهی زاده");
-  const [phone, setPhone] = useState("09123456789");
-  const [email, setEmail] = useState("user@example.com");
-  const [photo, setPhoto] = useState("/images/user.jpeg");
-  const role = "مدیر کل";
-
+  const [username, setUsername] = useState(user?.email);
+  const [fullName, setFullName] = useState(user?.name);
+  const [phone, setPhone] = useState(user?.phone);
   useEffect(() => {
     if (showModal) setTimeout(() => setAnimateModal(true), 10);
     else setAnimateModal(false);
@@ -52,7 +49,7 @@ export default function DashHome() {
 
   const handlePasswordChange = () => {
     if (newPassword.length < 4) {
-      toast.error("رمز عبور نباید کمتر از ۴ رقم باشد ❌");
+      toast.error("رمز عبور نباید کمتر از ۴ رقم باشد ");
       return;
     }
     setAnimatePasswordModal(false);
@@ -66,7 +63,7 @@ export default function DashHome() {
       {/* خوشامد */}
       <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl shadow-md">
         <h1 className="text-xs md:text-sm font-bold text-[#49C5B6] mb-2">
-          سلام {fullName} عزیز 👋
+          سلام {user?.name} عزیز 👋
         </h1>
         <p className="text-xs md:text-sm font-medium text-gray-300 text-justify">
           به داشبورد ایمن پرداز خوش آمدید. در این بخش می‌توانید اطلاعات حساب
@@ -76,8 +73,6 @@ export default function DashHome() {
 
       {/* کارت پروفایل */}
       <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl shadow-md flex flex-col lg:flex-row items-center lg:items-start gap-6 relative">
-       
-
         <div className="flex-1 w-full">
           <h2 className="text-lg md:text-xl font-semibold flex items-center gap-2 mb-4">
             <FaUser className="text-[#49C5B6]" />
@@ -90,27 +85,27 @@ export default function DashHome() {
               <span className="font-medium text-gray-400">
                 نام و نام خانوادگی:
               </span>
-              {fullName}
+              {user?.name}
             </li>
             <li className="flex items-center gap-2">
               <FaUser className="text-[#49C5B6]" />
               <span className="font-medium text-gray-400">نام کاربری:</span>
-              {username}
+              {user?.email}
             </li>
             <li className="flex items-center gap-2">
               <FaPhone className="text-[#49C5B6]" />
               <span className="font-medium text-gray-400">شماره تماس:</span>
-              {phone}
+              {user?.phone}
             </li>
-            <li className="flex items-center gap-2">
-              <FaEnvelope className="text-[#49C5B6]" />
-              <span className="font-medium text-gray-400">ایمیل:</span>
-              {email}
-            </li>
+
             <li className="flex items-center gap-2">
               <FaCrown className="text-yellow-400" />
               <span className="font-medium text-gray-400">نقش:</span>
-              {role}
+              {user?.role === "USER"
+                ? "کاربر عادی"
+                : user?.role === "ADMIN"
+                ? "مدیر"
+                : "بدون نقش"}
             </li>
           </ul>
 
@@ -229,21 +224,7 @@ export default function DashHome() {
                   onChange={(e) => setPhone(e.target.value)}
                   className="p-2 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-[#49C5B6] text-xs md:text-sm font-medium"
                 />{" "}
-              </div>{" "}
-              {/* ایمیل */}{" "}
-              <div className="flex flex-col">
-                {" "}
-                <label className="mb-1 flex items-center gap-2 text-[10px] md:text-xs font-medium">
-                  {" "}
-                  <FaEnvelope className="text-[#49C5B6]" /> ایمیل{" "}
-                </label>{" "}
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="p-2 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-[#49C5B6] text-xs md:text-sm font-medium"
-                />{" "}
-              </div>{" "}
+              </div>
               <div className="flex justify-end gap-4 mt-6">
                 {" "}
                 <button
