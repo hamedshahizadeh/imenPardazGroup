@@ -1,76 +1,96 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaTrash, FaEdit, FaUserPlus } from "react-icons/fa";
 import toast from "react-hot-toast";
 import Image from "next/image";
 
 export default function TeamPage() {
   const [team, setTeam] = useState([]);
-
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState(null);
-
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [memberToEdit, setMemberToEdit] = useState(null);
-  const [editData, setEditData] = useState({ name: "", role: "", avatar: "" });
-  const [editPreview, setEditPreview] = useState("");
-  const [editFile, setEditFile] = useState(null);
-
   const [showAddModal, setShowAddModal] = useState(false);
   const [newMember, setNewMember] = useState({
     name: "",
-    role: "",
+    position: "",
     avatar: "",
   });
   const [newPreview, setNewPreview] = useState("");
   const [newFile, setNewFile] = useState(null);
-
-  // 🚩 حالت‌های لودینگ
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [loadingAdd, setLoadingAdd] = useState(false);
+  const [loadingFetch, setLoadingFetch] = useState(false);
+
+  // 📌 دریافت اعضای تیم از API
+  const fetchTeam = async () => {
+    try {
+      setLoadingFetch(true);
+      const res = await fetch("/api/dashboard/team");
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "خطا در دریافت اعضای تیم");
+
+      setTeam(data.team || []);
+    } catch (err) {
+      console.error(err);
+      toast.error("❌ دریافت اطلاعات تیم ناموفق بود");
+    } finally {
+      setLoadingFetch(false);
+    }
+  };
+
+  // 📦 گرفتن لیست تیم هنگام اولین بار
+  useEffect(() => {
+    fetchTeam();
+  }, []);
 
   const confirmDelete = (member) => {
     setMemberToDelete(member);
     setShowDeleteModal(true);
   };
 
-  // 📌 حذف فایل تیم
-  const handleDelete = async (avatarUrl) => {
-    try {
-      setLoadingDelete(true);
+  // 🗑 حذف عضو تیم
+ const handleDelete = async (avatarUrl) => {
+  try {
+    setLoadingDelete(true);
+    const filename = avatarUrl.split("/").pop();
 
-      const filename = avatarUrl.split("/").pop();
-      const res = await fetch(`/api/team/${filename}`, { method: "DELETE" });
+    // 1️⃣ حذف عکس از سرور
+    const resImage = await fetch(`/api/team/${filename}`, { method: "DELETE" });
+    if (!resImage.ok) throw new Error("خطا در حذف تصویر");
 
-      if (!res.ok) throw new Error("خطا در حذف تصویر");
+    // 2️⃣ حذف رکورد از دیتابیس
+    const resDB = await fetch(`/api/dashboard/team/${filename}`, { method: "DELETE" });
+    if (!resDB.ok) throw new Error("خطا در حذف عضو از دیتابیس");
 
-      const data = await res.json();
-      console.log(data.message);
-      toast.success(`همکار مورد نظر با موفقیت حذف شد`);
+    toast.success(`همکار با موفقیت حذف شد`);
+    await fetchTeam()
 
-      setTeam((prev) => prev.filter((member) => member.avatar !== avatarUrl));
+    // به روز کردن آرایه تیم در فرانت
+    setTeam((prev) => prev.filter((m) => m.avatar !== avatarUrl));
+    setShowDeleteModal(false);
+    setMemberToDelete(null);
 
-      setShowDeleteModal(false);
-      setMemberToDelete(null);
-    } catch (err) {
-      console.error("Delete error:", err);
-      toast.error("❌ مشکل در حذف تصویر");
-    } finally {
-      setLoadingDelete(false);
-    }
-  };
+  } catch (err) {
+    console.error(err);
+    toast.error("❌ حذف ناموفق بود");
+  } finally {
+    setLoadingDelete(false);
+  }
+};
 
-  // 📌 ذخیره عضو جدید
+
+  // ➕ افزودن عضو جدید
   const handleAddSave = async () => {
-    if (!newMember.name || !newMember.role) {
+    if (!newMember.name || !newMember.position) {
       toast.error("لطفاً همه فیلدها را پر کنید!");
       return;
     }
 
     setLoadingAdd(true);
-
     let uploadedUrl = newMember.avatar;
+
+    // اگر فایل جدید انتخاب شده
     if (newFile) {
       const formData = new FormData();
       formData.append("file", newFile);
@@ -81,26 +101,42 @@ export default function TeamPage() {
           body: formData,
         });
         const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Upload failed");
         uploadedUrl = data.filename;
-      } catch {
+      } catch (err) {
         toast.error("آپلود تصویر ناموفق بود!");
         setLoadingAdd(false);
         return;
       }
     }
 
-    const newId = team.length ? Math.max(...team.map((m) => m.id)) + 1 : 1;
-    setTeam((prev) => [
-      ...prev,
-      { id: newId, ...newMember, avatar: uploadedUrl },
-    ]);
-    setShowAddModal(false);
-    setNewMember({ name: "", role: "", avatar: "" });
-    setNewPreview("");
-    setNewFile(null);
-    toast.success("عضو جدید اضافه شد!");
+    try {
+      const res = await fetch("/api/dashboard/team", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newMember.name,
+          position: newMember.position,
+          image: uploadedUrl,
+        }),
+      });
 
-    setLoadingAdd(false);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to save member");
+
+      toast.success("✅ عضو جدید اضافه شد");
+      setNewMember({ name: "", position: "", avatar: "" });
+      setNewPreview("");
+      setNewFile(null);
+      setShowAddModal(false);
+
+      // 📥 پس از افزودن، لیست را دوباره بگیر
+      fetchTeam();
+    } catch (err) {
+      toast.error(err.message || "خطا در ذخیره عضو!");
+    } finally {
+      setLoadingAdd(false);
+    }
   };
 
   return (
@@ -118,46 +154,52 @@ export default function TeamPage() {
       </div>
 
       {/* کارت‌های تیم */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {team.map((member) => (
-          <div
-            key={member.id}
-            className="bg-gray-800/70 backdrop-blur-sm rounded-xl shadow-lg p-2 flex flex-col items-center gap-2"
-          >
-            <Image
-              width={200}
-              height={200}
-              priority
-              src={`/api/team/${member.avatar}`}
-              alt={member.name}
-              className="w-20 h-20 rounded-full object-cover border-2 border-[#49C5B6]"
-            />
-            <div className="text-center">
-              <h3 className="font-medium text-sm lg:text-base text-white">
-                {member.name}
-              </h3>
-              <p className="text-gray-300 font-medium text-xs lg:text-sm">
-                {member.role}
-              </p>
+      {loadingFetch ? (
+        <p className="text-center text-gray-400 text-sm">در حال بارگذاری...</p>
+      ) : team.length === 0 ? (
+        <p className="text-center text-gray-400 text-sm">هیچ عضوی یافت نشد</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {team.map((member) => (
+            <div
+              key={member._id}
+              className="bg-gray-800/70 backdrop-blur-sm rounded-xl shadow-lg p-2 flex flex-col items-center gap-2"
+            >
+              <Image
+                width={200}
+                height={200}
+                priority
+                src={`/api/dashboard/team/${member.image}`} // ✅ مسیر جدی
+                alt={member.name}
+                className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-2 border-[#49C5B6]"
+              />
+              <div className="text-center">
+                <h3 className="font-medium text-xs lg:text-sm text-white">
+                  {member.name}
+                </h3>
+                <p className="text-gray-300 font-medium text-xs lg:text-sm">
+                  {member.position}
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => confirmDelete(member)}
+                  className="flex items-center gap-2 bg-red-600/80 hover:bg-red-700 text-white text-[10px] md:text-xs px-2 py-1 cursor-pointer rounded transition disabled:opacity-50"
+                  disabled={loadingDelete}
+                >
+                  {loadingDelete ? (
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  ) : (
+                    <>
+                      <FaTrash /> حذف
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
-            <div className="flex gap-3 mt-1">
-              <button
-                onClick={() => confirmDelete(member)}
-                className="flex items-center gap-2 bg-red-600/80 hover:bg-red-700 text-white text-[10px] md:text-xs px-2 py-1 cursor-pointer rounded transition disabled:opacity-50"
-                disabled={loadingDelete}
-              >
-                {loadingDelete ? (
-                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                ) : (
-                  <>
-                    <FaTrash /> حذف
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Modal حذف */}
       {showDeleteModal && (
@@ -170,7 +212,7 @@ export default function TeamPage() {
             </h2>
             <div className="flex justify-center gap-4 mt-3">
               <button
-                onClick={() => handleDelete(memberToDelete.avatar)}
+                onClick={() => handleDelete(memberToDelete.image)}
                 disabled={loadingDelete}
                 className="px-3 py-2 text-xs font-medium cursor-pointer rounded-lg bg-red-600 hover:bg-red-700 text-white transition disabled:opacity-50"
               >
@@ -198,7 +240,6 @@ export default function TeamPage() {
             <h2 className="text-sm font-medium text-white mb-4">
               افزودن همکار جدید
             </h2>
-            {/* فیلدها */}
             <div className="flex flex-col gap-3 mb-4 text-sm text-gray-200">
               <input
                 type="text"
@@ -212,9 +253,9 @@ export default function TeamPage() {
               <input
                 type="text"
                 placeholder="سمت"
-                value={newMember.role}
+                value={newMember.position}
                 onChange={(e) =>
-                  setNewMember({ ...newMember, role: e.target.value })
+                  setNewMember({ ...newMember, position: e.target.value })
                 }
                 className="w-full border border-gray-600 rounded px-2 py-1 bg-gray-900 text-white"
               />

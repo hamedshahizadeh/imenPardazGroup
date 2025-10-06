@@ -18,33 +18,44 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const handleRegister = async (e) => {
     e.preventDefault();
-
+    setIsLoading(true);
     if (!name || !email || !phone || !password || !confirmPassword) {
       toast.error("لطفاً همه فیلدها را پر کنید!");
+      setIsLoading(false);
+
       return;
     }
-// شرط برای username
-if (name.length < 8 ) {
-  toast.error("نام کاربری باید حداقل 8 کاراکتر باشد !");
-  return;
-}
+    if (email.length < 8) {
+      toast.error("نام کاربری باید حداقل 8 کاراکتر باشد !");
+      setIsLoading(false);
+      return;
+    }
 
-// شرط برای password
-if (password.length < 6 || !/[A-Z]/.test(password)) {
-  toast.error("رمز عبور باید حداقل 6 کاراکتر باشد و حداقل یک حرف بزرگ انگلیسی داشته باشد!");
-  return;
-}
+    // شرط برای password
+    if (password.length < 6 || !/[A-Z]/.test(password)) {
+      toast.error(
+        "رمز عبور باید حداقل 6 کاراکتر باشد و حداقل یک حرف بزرگ انگلیسی داشته باشد!"
+      );
+      setIsLoading(false);
+
+      return;
+    }
     // شرط شماره تلفن
     const phoneRegex = /^09\d{9}$/;
     if (!phoneRegex.test(phone)) {
       toast.error("شماره تلفن باید با 09 شروع شود و 11 رقم باشد!");
+      setIsLoading(false);
+
       return;
     }
 
     if (password !== confirmPassword) {
       toast.error("رمز عبور و تکرار آن مطابقت ندارند!");
+      setIsLoading(false);
+
       return;
     }
     const res = await fetch("/api/auth/signup", {
@@ -70,6 +81,7 @@ if (password.length < 6 || !/[A-Z]/.test(password)) {
     } else {
       toast.error(data.error);
     }
+    setIsLoading(false);
   };
   return (
     <div className="relative bg-gray-950">
@@ -161,8 +173,14 @@ if (password.length < 6 || !/[A-Z]/.test(password)) {
               type="submit"
               className="w-full flex items-center text-sm cursor-pointer justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold transition shadow-md"
             >
-              <FaSignInAlt size={14} />
-              ثبت‌نام
+              {isLoading ? (
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              ) : (
+                <>
+                  <FaSignInAlt size={14} />
+                  ثبت‌نام
+                </>
+              )}
             </button>
           </form>
 

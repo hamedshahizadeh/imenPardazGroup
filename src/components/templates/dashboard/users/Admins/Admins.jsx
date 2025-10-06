@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FaUser,
   FaEdit,
@@ -11,82 +11,126 @@ import {
   FaUserTie,
 } from "react-icons/fa";
 import toast from "react-hot-toast";
-
 export default function Admins() {
-  const owner = {
-    name: "حامد شاهی زاده",
-    username: "hamedshahizadeh",
-    phone: "09123456789",
-    role: "مالک",
-    position: "مدیر کل",
-  };
-
-  const [admins, setAdmins] = useState([
-    {
-      id: 1,
-      name: "رضا احمدی",
-      username: "reza123",
-      phone: "09121234567",
-      password: "123456",
-      position: "مدیر فنی",
-    },
-    {
-      id: 2,
-      name: "سارا محمدی",
-      username: "sara456",
-      phone: "09129876543",
-      password: "abcdef",
-      position: "مدیر بازاریابی",
-    },
-    {
-      id: 3,
-      name: "مهدی کاظمی",
-      username: "mehdi789",
-      phone: "09127654321",
-      password: "qwerty",
-      position: "مدیر محتوا",
-    },
-  ]);
+  const [admins, setAdmins] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  const indexOfLastAdmin = currentPage * itemsPerPage;
+  const indexOfFirstAdmin = indexOfLastAdmin - itemsPerPage;
+  const currentAdmins = [...admins]
+    .reverse()
+    .slice(indexOfFirstAdmin, indexOfLastAdmin);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentAdmin, setCurrentAdmin] = useState(null);
-
+  const [isLoadAdd, setIsLoadAdd] = useState(false);
+  const [isLoadDelete, setIsLoadDelete] = useState(false);
+  const [isLoadEdit, setIsLoadEdit] = useState(false);
+  const [loadingFetch, setLoadingFetch] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     username: "",
     phone: "",
     password: "",
-    position: "",
   });
 
-  const handleAddAdmin = () => {
+  const handleAddAdmin = async (e) => {
+    e.preventDefault();
+    setIsLoadAdd(true);
     if (
       !formData.name ||
       !formData.username ||
       !formData.phone ||
-      !formData.position
+      !formData.password
     ) {
       toast.error("لطفاً همه فیلدها را پر کنید");
+      setIsLoadAdd(false);
       return;
     }
-    const newAdmin = { id: Date.now(), ...formData };
-    setAdmins((prev) => [...prev, newAdmin]);
-    toast.success(`مدیر "${formData.name}" اضافه شد`);
-    setFormData({
-      name: "",
-      username: "",
-      phone: "",
-      password: "",
-      position: "",
-    });
-    setShowAddModal(false);
-  };
 
+    // شرط برای username
+    if (formData.username.length < 8) {
+      toast.error("نام کاربری باید حداقل 8 کاراکتر باشد !");
+      setIsLoadAdd(false);
+
+      return;
+    }
+    const phoneRegex = /^09\d{9}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      toast.error("شماره تلفن باید با 09 شروع شود و 11 رقم باشد!");
+      setIsLoadAdd(false);
+
+      return;
+    }
+    // شرط برای password
+    if (formData.password.length < 6 || !/[A-Z]/.test(formData.password)) {
+      toast.error(
+        "رمز عبور باید حداقل 6 کاراکتر باشد و حداقل یک حرف بزرگ انگلیسی داشته باشد!"
+      );
+      setIsLoadAdd(false);
+      return;
+    }
+
+    const res = await fetch("/api/dashboard/admin/add", {
+      method: "POST",
+      body: JSON.stringify({
+        name: formData.name,
+        email: formData.username,
+        phone: formData.phone,
+        password: formData.password,
+      }),
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json();
+
+    if (res.status === 200) {
+      toast.success(data.message);
+      await fetchAdmins();
+      setFormData({
+        name: "",
+        username: "",
+        phone: "",
+        password: "",
+      });
+      setIsLoadAdd(false);
+      setShowAddModal(false);
+    } else {
+      toast.error(data.error);
+      setIsLoadAdd(false);
+    }
+  };
+  const fetchAdmins = async () => {
+    setLoadingFetch(true);
+
+    try {
+      const res = await fetch("/api/dashboard/admin/all");
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || "خطا در دریافت اطلاعات");
+        return;
+      }
+      setAdmins(data.admins || []);
+    } catch (err) {
+      toast.error("خطای شبکه");
+      console.error(err);
+    } finally {
+      setLoadingFetch(false);
+    }
+  };
+  useEffect(() => {
+    fetchAdmins();
+  }, []);
   const handleOpenEditModal = (admin) => {
     setCurrentAdmin(admin);
-    setFormData({ ...admin });
+    setFormData({
+      name: admin.name || "",
+      username: admin.email || "", // چون تو DB فیلد email داری
+      phone: admin.phone || "",
+      password: "", // پسورد رو معمولا خالی میذارن
+    });
     setShowEditModal(true);
   };
 
@@ -96,20 +140,62 @@ export default function Admins() {
       username: "",
       phone: "",
       password: "",
-      position: "",
     }); // فرم خالی شود
     setShowAddModal(true);
   };
 
-  const handleEditAdmin = () => {
-    setAdmins((prev) =>
-      prev.map((a) =>
-        a.id === currentAdmin.id ? { ...formData, id: a.id } : a
-      )
-    );
-    toast.success(`مدیر "${formData.name}" ویرایش شد`);
-    setShowEditModal(false);
-    setCurrentAdmin(null);
+  const handleEditAdmin = async () => {
+    if (!currentAdmin) return;
+    setIsLoadEdit(true);
+    if (!formData.name || !formData.phone) {
+      toast.error("لطفاً  فیلدهای نام و شماره تماس را پر کنید");
+      setIsLoadEdit(false);
+      return;
+    }
+    const phoneRegex = /^09\d{9}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      toast.error("شماره تلفن باید با 09 شروع شود و 11 رقم باشد!");
+
+      setIsLoadEdit(false);
+
+      return;
+    }
+    // شرط برای password
+    if (
+      formData.password && // ← یعنی فقط اگر چیزی وارد شده
+      (formData.password.length < 6 || !/[A-Z]/.test(formData.password))
+    ) {
+      toast.error(
+        "رمز عبور باید حداقل 6 کاراکتر باشد و حداقل یک حرف بزرگ انگلیسی داشته باشد!"
+      );
+      setIsLoadEdit(false);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/dashboard/admin/${currentAdmin._id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success(data.message);
+        await fetchAdmins();
+        setIsLoadEdit(false);
+
+        setShowEditModal(false);
+        setCurrentAdmin(null);
+      } else {
+        toast.error(data.error);
+        setIsLoadEdit(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setIsLoadEdit(false);
+
+      toast.error("خطای شبکه");
+    }
   };
 
   const handleDeleteAdmin = (admin) => {
@@ -117,11 +203,34 @@ export default function Admins() {
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
-    setAdmins((prev) => prev.filter((a) => a.id !== currentAdmin.id));
-    toast.success(`مدیر "${currentAdmin.name}" حذف شد`);
-    setShowDeleteModal(false);
-    setCurrentAdmin(null);
+  const confirmDelete = async () => {
+    if (!currentAdmin) return;
+    setIsLoadDelete(true);
+
+    try {
+      const res = await fetch(`/api/dashboard/admin/${currentAdmin._id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        // حذف موفقیت‌آمیز از state
+        toast.success(`مدیر "${currentAdmin.name}" حذف شد`);
+        setIsLoadDelete(false);
+
+        await fetchAdmins();
+
+        setShowDeleteModal(false);
+        setCurrentAdmin(null);
+      } else {
+        toast.error(data.error || "خطا در حذف مدیر");
+        setIsLoadDelete(false);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("خطای شبکه هنگام حذف مدیر");
+      setIsLoadDelete(false);
+    }
   };
 
   const inputClasses =
@@ -130,25 +239,6 @@ export default function Admins() {
   return (
     <div className="space-y-6 container">
       {/* مالک */}
-      <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl shadow-md flex flex-col md:flex-row items-center gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-[#49C5B6] flex items-center justify-center text-white text-xl font-bold">
-            {owner.name[0]}
-          </div>
-          <div className="space-y-1">
-            <p className="text-gray-200 font-medium text-sm">{owner.name}</p>
-            <p className="text-gray-400 text-xs font-medium">
-              نام کاربری: {owner.username}
-            </p>
-            <p className="text-gray-400 text-xs font-medium">
-              شماره تماس: {owner.phone}
-            </p>
-            <p className="text-gray-400 text-xs font-medium">
-              سمت: {owner.position}
-            </p>
-          </div>
-        </div>
-      </div>
 
       {/* مدیران */}
       <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl shadow-md">
@@ -158,47 +248,75 @@ export default function Admins() {
           </h2>
           <button
             onClick={handleOpenAddModal}
-            className="flex items-center gap-2 bg-[#49C5B6] hover:bg-[#37a199] cursor-pointer text-white text-xs md:text-sm px-2 py-1 rounded transition"
+            className="flex items-center gap-2 bg-[#49C5B6] hover:bg-[#37a199] text-white text-[10px] md:text-xs px-2 py-1 cursor-pointer rounded transition shadow-md"
           >
             <FaPlus /> افزودن مدیر جدید
           </button>
         </div>
 
-        <ul className="space-y-2">
-          {admins.map((admin) => (
-            <li
-              key={admin.id}
-              className="flex justify-between items-center bg-white/10 p-3 rounded-lg hover:bg-white/20 transition"
-            >
-              <div>
-                <p className="text-gray-200 font-medium text-xs">{admin.name}</p>
-                <p className="text-gray-400 text-xs font-medium">
-                  نام کاربری: {admin.username}
-                </p>
-                <p className="text-gray-400 text-xs font-medium">
-                  شماره تماس: {admin.phone}
-                </p>
-                <p className="text-gray-400 text-xs font-medium">
-                  سمت: {admin.position}
-                </p>
-              </div>
-              <div className="flex flex-col gap-2">
+        {loadingFetch ? (
+          <p className="text-center text-gray-400 text-sm">
+            در حال بارگذاری...
+          </p>
+        ) : currentAdmins.length === 0 ? (
+          <p className="text-center text-gray-400 text-sm">هیچ ادمینی یافت نشد</p>
+        ) : (
+          <ul className="space-y-2">
+            {currentAdmins.map((admin) => (
+              <li
+                key={admin._id}
+                className="flex justify-between items-center bg-white/10 p-3 rounded-lg hover:bg-white/20 transition"
+              >
+                <div>
+                  <p className="text-gray-200 font-medium text-xs">
+                    {admin.name}
+                  </p>
+                  <p className="text-gray-400 text-xs font-medium">
+                    نام کاربری: {admin.email}
+                  </p>
+                  <p className="text-gray-400 text-xs font-medium">
+                    شماره تماس: {admin.phone}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => handleOpenEditModal(admin)}
+                    className="flex items-center gap-1 text-[10px] md:text-xs  px-2 py-1 cursor-pointer  rounded-xs justify-center bg-blue-600 hover:bg-blue-700 text-white transition"
+                  >
+                    <FaEdit /> ویرایش
+                  </button>
+                  <button
+                    onClick={() => handleDeleteAdmin(admin)}
+                    className="flex items-center justify-center gap-1 text-[10px] md:text-xs  px-2 py-1 cursor-pointer rounded-xs bg-red-600 hover:bg-red-700 text-white transition"
+                  >
+                    <FaTrash /> حذف
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {admins.length > itemsPerPage && (
+          <div className="flex justify-center gap-2 mt-4">
+            {Array.from(
+              { length: Math.ceil(admins.length / itemsPerPage) },
+              (_, i) => (
                 <button
-                  onClick={() => handleOpenEditModal(admin)}
-                  className="flex items-center gap-1 text-[10px] md:text-xs  px-2 py-1 cursor-pointer  rounded-xs justify-center bg-blue-600 hover:bg-blue-700 text-white transition"
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`px-3 py-1 rounded ${
+                    currentPage === i + 1
+                      ? "bg-[#49C5B6] text-white"
+                      : "bg-gray-700 text-white"
+                  }`}
                 >
-                  <FaEdit /> ویرایش
+                  {i + 1}
                 </button>
-                <button
-                  onClick={() => handleDeleteAdmin(admin)}
-                  className="flex items-center justify-center gap-1 text-[10px] md:text-xs  px-2 py-1 cursor-pointer rounded-xs bg-red-600 hover:bg-red-700 text-white transition"
-                >
-                  <FaTrash /> حذف
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+              )
+            )}
+          </div>
+        )}
       </div>
 
       {/* مودال افزودن مدیر */}
@@ -208,7 +326,7 @@ export default function Admins() {
             <h2 className="text-center text-sm md:text-base font-bold text-[#49C5B6] mb-2 flex items-center gap-2">
               <FaUserShield /> افزودن مدیر جدید
             </h2>
-            <div className="space-y-2">
+            <div className="space-y-1">
               <label className="flex items-center gap-2 font-medium">
                 <FaUser /> نام
               </label>
@@ -256,26 +374,18 @@ export default function Admins() {
                 }
                 className={inputClasses}
               />
-
-              <label className="flex items-center gap-2 font-medium">
-                <FaUserTie /> سمت
-              </label>
-              <input
-                type="text"
-                value={formData.position}
-                onChange={(e) =>
-                  setFormData({ ...formData, position: e.target.value })
-                }
-                className={inputClasses}
-              />
             </div>
 
             <div className="flex justify-end gap-2">
               <button
                 onClick={handleAddAdmin}
-                className="px-3 py-1 text-xs md:text-sm  cursor-pointer rounded-md bg-[#49C5B6] hover:bg-[#37a199] text-white transition"
+                className="px-3 py-1 flex items-center justify-center text-xs md:text-sm  cursor-pointer rounded-md bg-[#49C5B6] hover:bg-[#37a199] text-white transition"
               >
-                افزودن
+                {isLoadAdd ? (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  "افزودن"
+                )}
               </button>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -295,7 +405,7 @@ export default function Admins() {
             <h2 className="text-center text-sm md:text-base font-bold text-[#49C5B6] mb-2 flex items-center gap-2">
               <FaEdit /> ویرایش مدیر
             </h2>
-            <div className="space-y-2">
+            <div className="space-y-1">
               <label className="flex items-center gap-2 font-medium">
                 <FaUser /> نام
               </label>
@@ -307,19 +417,6 @@ export default function Admins() {
                 }
                 className={inputClasses}
               />
-
-              <label className="flex items-center gap-2 font-medium">
-                <FaUserShield /> نام کاربری
-              </label>
-              <input
-                type="text"
-                value={formData.username}
-                onChange={(e) =>
-                  setFormData({ ...formData, username: e.target.value })
-                }
-                className={inputClasses}
-              />
-
               <label className="flex items-center gap-2 font-medium">
                 <FaPhone /> شماره تماس
               </label>
@@ -343,25 +440,17 @@ export default function Admins() {
                 }
                 className={inputClasses}
               />
-
-              <label className="flex items-center gap-2 font-medium">
-                <FaUserTie /> سمت
-              </label>
-              <input
-                type="text"
-                value={formData.position}
-                onChange={(e) =>
-                  setFormData({ ...formData, position: e.target.value })
-                }
-                className={inputClasses}
-              />
             </div>
             <div className="flex justify-end gap-2">
               <button
                 onClick={handleEditAdmin}
-                className="px-3 py-1 text-xs md:text-sm rounded-md  cursor-pointer bg-[#49C5B6] hover:bg-[#37a199] text-white transition"
+                className="px-3 py-1 text-xs flex items-center justify-center md:text-sm rounded-md  cursor-pointer bg-[#49C5B6] hover:bg-[#37a199] text-white transition"
               >
-                ذخیره
+                {isLoadEdit ? (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  "تغییر"
+                )}
               </button>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -386,9 +475,13 @@ export default function Admins() {
             <div className="flex justify-center gap-4">
               <button
                 onClick={confirmDelete}
-                className="px-3 py-2 text-xs md:text-sm font-medium rounded-md bg-red-600 cursor-pointer hover:bg-red-700 text-white transition"
+                className="px-3 py-2 text-xs flex items-center justify-center md:text-sm font-medium rounded-md bg-red-600 cursor-pointer hover:bg-red-700 text-white transition"
               >
-                بله، حذف شود
+                {isLoadDelete ? (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  "حذف"
+                )}
               </button>
               <button
                 onClick={() => setShowDeleteModal(false)}

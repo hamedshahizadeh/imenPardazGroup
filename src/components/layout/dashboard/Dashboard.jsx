@@ -38,7 +38,6 @@ export default function DashboardLayout({ children }) {
     router.replace("/");
     router.refresh();
   };
-
   return (
     <div className="flex h-screen bg-gray-950 text-white font-medium relative overflow-hidden pt-14 lg:pt-16">
       {/* انیمیشن بک‌گراند */}
@@ -84,11 +83,11 @@ export default function DashboardLayout({ children }) {
             {user?.name}
           </p>
           <p className="text-center text-[10px] md:text-xs text-gray-400 font-light">
-            {user?.role === "USER"
-              ? "کاربر عادی"
+            {user?.role === "OWER"
+              ? "مالک"
               : user?.role === "ADMIN"
               ? "مدیر"
-              : "بدون نقش"}
+              : "کاربر عادی"}
           </p>
         </div>
         <ul className="space-y-2 mt-4 ">
@@ -104,177 +103,182 @@ export default function DashboardLayout({ children }) {
               <span>پروفایل</span>
             </Link>
           </li>
-
-          <li>
-            <button
-              onClick={() => setSiteMenuOpen(!siteMenuOpen)}
-              className="w-full flex items-center justify-between gap-3 text-xs md:text-sm font-sans font-medium 
+          {user?.role === "OWER" ? (
+            <li>
+              <button
+                onClick={() => setSiteMenuOpen(!siteMenuOpen)}
+                className="w-full flex items-center justify-between gap-3 text-xs md:text-sm font-sans font-medium 
            bg-white/10 hover:bg-white/20 rounded-xl px-3 py-2 
            transition duration-300 text-gray-100"
-            >
-              <div className="flex items-center gap-3 text-xs md:text-sm font-medium">
-                <FaCogs className="text-lg text-[#49C5B6]" />
-                <span>مدیریت کلی سایت</span>
-              </div>
-              <FaChevronDown
-                className={`transition-transform ${
-                  siteMenuOpen ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-            {siteMenuOpen && (
-              <ul className="px-1 md:px-2 mt-2 space-y-2">
-                {/* سازمان‌ها */}
-                <li>
-                  <Link
-                    href="/dashboard/organizations"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2 text-xs md:text-sm font-sans font-medium 
+              >
+                <div className="flex items-center gap-3 text-xs md:text-sm font-medium">
+                  <FaCogs className="text-lg text-[#49C5B6]" />
+                  <span>مدیریت کلی سایت</span>
+                </div>
+                <FaChevronDown
+                  className={`transition-transform ${
+                    siteMenuOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+              {siteMenuOpen && (
+                <ul className="px-1 md:px-2 mt-2 space-y-2">
+                  {/* سازمان‌ها */}
+                  <li>
+                    <Link
+                      href="/dashboard/organizations"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 text-xs md:text-sm font-sans font-medium 
                bg-white/5 hover:bg-white/15 rounded-lg px-3 py-2 
                text-gray-300 hover:text-white transition"
-                  >
-                    <FaBuilding className="text-sm text-[#49C5B6]" />
-                    <span>سازمان‌ها</span>
-                  </Link>
-                </li>
+                    >
+                      <FaBuilding className="text-sm text-[#49C5B6]" />
+                      <span>سازمان‌ها</span>
+                    </Link>
+                  </li>
 
-                {/* نظرات مشتریان */}
-                <li>
-                  <Link
-                    href="/dashboard/customer-reviews"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2 text-xs md:text-sm font-sans font-medium 
+                  {/* نظرات مشتریان */}
+                  <li>
+                    <Link
+                      href="/dashboard/customer-reviews"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 text-xs md:text-sm font-sans font-medium 
                bg-white/5 hover:bg-white/15 rounded-lg px-3 py-2 
                text-gray-300 hover:text-white transition"
-                  >
-                    <FaComments className="text-sm text-[#49C5B6]" />
-                    <span>نظرات مشتریان</span>
-                  </Link>
-                </li>
+                    >
+                      <FaComments className="text-sm text-[#49C5B6]" />
+                      <span>نظرات مشتریان</span>
+                    </Link>
+                  </li>
 
-                {/* تیم ما */}
-                <li>
-                  <Link
-                    href="/dashboard/team"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2 text-xs md:text-sm font-sans font-medium 
+                  {/* تیم ما */}
+                  <li>
+                    <Link
+                      href="/dashboard/team"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 text-xs md:text-sm font-sans font-medium 
                bg-white/5 hover:bg-white/15 rounded-lg px-3 py-2 
                text-gray-300 hover:text-white transition"
-                  >
-                    <FaUsers className="text-sm text-[#49C5B6]" />
-                    <span>تیم ما</span>
-                  </Link>
-                </li>
+                    >
+                      <FaUsers className="text-sm text-[#49C5B6]" />
+                      <span>تیم ما</span>
+                    </Link>
+                  </li>
 
-                {/* ویدیوها */}
-                <li>
-                  <Link
-                    href="/dashboard/videos"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2 text-xs md:text-sm font-sans font-medium 
+                  {/* ویدیوها */}
+                  <li>
+                    <Link
+                      href="/dashboard/videos"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 text-xs md:text-sm font-sans font-medium 
                bg-white/5 hover:bg-white/15 rounded-lg px-3 py-2 
                text-gray-300 hover:text-white transition"
-                  >
-                    <FaVideo className="text-sm text-[#49C5B6]" />
-                    <span>ویدیوها</span>
-                  </Link>
-                </li>
-              </ul>
-            )}
-          </li>
+                    >
+                      <FaVideo className="text-sm text-[#49C5B6]" />
+                      <span>ویدیوها</span>
+                    </Link>
+                  </li>
+                </ul>
+              )}
+            </li>
+          ) : null}
 
-          <li>
-            <button
-              onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="w-full flex items-center justify-between gap-3 text-xs md:text-sm font-sans font-medium 
+          {user?.role === "OWER" ? (
+            <li>
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="w-full flex items-center justify-between gap-3 text-xs md:text-sm font-sans font-medium 
                      bg-white/10 hover:bg-white/20 rounded-xl px-3 py-2 
                      transition duration-300 text-gray-100"
-            >
-              <div className="flex items-center gap-3 text-xs md:text-sm font-medium">
-                <FaUsers className="text-lg text-[#49C5B6]" />
-                <span>مدیریت کاربران</span>
-              </div>
-              <FaChevronDown
-                className={`transition-transform ${
-                  userMenuOpen ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-            {userMenuOpen && (
-              <ul className="px-1 md:px-2 mt-2 space-y-2">
-                {/* مدیران */}
-                <li>
-                  <Link
-                    href="/dashboard/users/admins"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2 text-xs md:text-sm font-sans font-medium 
+              >
+                <div className="flex items-center gap-3 text-xs md:text-sm font-medium">
+                  <FaUsers className="text-lg text-[#49C5B6]" />
+                  <span>مدیریت کاربران</span>
+                </div>
+                <FaChevronDown
+                  className={`transition-transform ${
+                    userMenuOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+              {userMenuOpen && (
+                <ul className="px-1 md:px-2 mt-2 space-y-2">
+                  {/* مدیران */}
+                  <li>
+                    <Link
+                      href="/dashboard/users/admins"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 text-xs md:text-sm font-sans font-medium 
                      bg-white/5 hover:bg-white/15 rounded-lg px-3 py-2 
                      text-gray-300 hover:text-white transition"
-                  >
-                    <FaUserShield className="text-sm text-[#49C5B6]" />
-                    <span>مدیران</span>
-                  </Link>
-                </li>
+                    >
+                      <FaUserShield className="text-sm text-[#49C5B6]" />
+                      <span>مدیران</span>
+                    </Link>
+                  </li>
 
-                {/* کاربران ویژه */}
-                <li>
-                  <Link
-                    href="/dashboard/users/vip"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2 text-xs md:text-sm font-sans font-medium 
+                  {/* کاربران ویژه */}
+                  <li>
+                    <Link
+                      href="/dashboard/users/vip"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 text-xs md:text-sm font-sans font-medium 
                      bg-white/5 hover:bg-white/15 rounded-lg px-3 py-2 
                      text-gray-300 hover:text-white transition"
-                  >
-                    <FaStar className="text-sm text-yellow-300" />
-                    <span>کاربران ویژه</span>
-                  </Link>
-                </li>
+                    >
+                      <FaStar className="text-sm text-yellow-300" />
+                      <span>کاربران ویژه</span>
+                    </Link>
+                  </li>
 
-                {/* کاربران عادی */}
-                <li>
-                  <Link
-                    href="/dashboard/users/regular"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2 text-xs md:text-sm font-sans font-medium 
+                  {/* کاربران عادی */}
+                  <li>
+                    <Link
+                      href="/dashboard/users/regular"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 text-xs md:text-sm font-sans font-medium 
                      bg-white/5 hover:bg-white/15 rounded-lg px-3 py-2 
                      text-gray-300 hover:text-white transition"
-                  >
-                    <FaUser className="text-sm text-gray-400" />
-                    <span>کاربران عادی</span>
-                  </Link>
-                </li>
-              </ul>
-            )}
-          </li>
+                    >
+                      <FaUser className="text-sm text-gray-400" />
+                      <span>کاربران عادی</span>
+                    </Link>
+                  </li>
+                </ul>
+              )}
+            </li>
+          ) : null}
 
-          {/* مدیریت بلاگ‌ها */}
-          <li>
-            <Link
-              href="/dashboard/blogs"
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center gap-3 font-sans font-medium 
+          {user?.role === "OWER" ? (
+            <li>
+              <Link
+                href="/dashboard/blogs"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 font-sans font-medium 
                      bg-white/10 hover:bg-white/20 rounded-xl px-3 py-2 
                      transition duration-300 text-gray-100
                      text-xs md:text-sm"
-            >
-              <FaBlog className="text-lg text-[#49C5B6]" />
-              <span>مدیریت بلاگ‌ها</span>
-            </Link>
-          </li>
+              >
+                <FaBlog className="text-lg text-[#49C5B6]" />
+                <span>مدیریت بلاگ‌ها</span>
+              </Link>
+            </li>
+          ) : null}
 
-          {/* مدیریت کامنت‌ها */}
-          <li>
-            <Link
-              href="/dashboard/comments"
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center gap-3 text-xs md:text-sm font-sans font-medium 
+          {user?.role === "OWER" || user?.role === "ADMIN" ? (
+            <li>
+              <Link
+                href="/dashboard/comments"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 text-xs md:text-sm font-sans font-medium 
                      bg-white/10 hover:bg-white/20 rounded-xl px-3 py-2 
                      transition duration-300 text-gray-100"
-            >
-              <FaComments className="text-lg text-[#49C5B6]" />
-              <span>مدیریت کامنت‌ها</span>
-            </Link>
-          </li>
+              >
+                <FaComments className="text-lg text-[#49C5B6]" />
+                <span>مدیریت کامنت‌ها</span>
+              </Link>
+            </li>
+          ) : null}
 
           {/* کامنت‌های من */}
           <li>

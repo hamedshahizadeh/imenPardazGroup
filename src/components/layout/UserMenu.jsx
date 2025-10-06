@@ -19,7 +19,7 @@ export default function UserMenu({ isLoggedIn, name, email }) {
     await signOut({ redirect: false }); // کوکی و سشن پاک میشه
     toast.success("خروج شما با موفقیت انجام شد");
     router.replace("/");
-    router.refresh()
+    router.refresh();
   };
 
   useEffect(() => {
@@ -49,14 +49,15 @@ export default function UserMenu({ isLoggedIn, name, email }) {
               width={48}
               height={48}
               alt={name}
+              priority
               className=" w-6 h-6 border-2 border-[#49c5b6] rounded-full"
             />
-           <div className="flex items-center">
-             <h6 className="font-medium text-xs text-white break-words">
-              {name}
-            </h6>
-            <IoMdArrowDropdown className="text-[#49c5b6] size-5" />
-           </div>
+            <div className="flex items-center">
+              <h6 className="font-medium text-xs text-white break-words">
+                {name}
+              </h6>
+              <IoMdArrowDropdown className="text-[#49c5b6] size-5" />
+            </div>
           </div>
 
           {/* سایر آیکون‌ها */}
@@ -78,6 +79,7 @@ export default function UserMenu({ isLoggedIn, name, email }) {
                   src="/images/user.jpeg"
                   width={60}
                   height={60}
+                  priority
                   alt={name}
                   className="rounded-full w-12 h-12 border-2 border-[#49C5B6]"
                 />

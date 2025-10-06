@@ -7,7 +7,7 @@ export async function GET(req, context) {
     if (!filename) return new Response("Filename required", { status: 400 });
 
     const safeName = path.basename(filename); // جلوگیری از مسیرهای خطرناک
-    const filePath = path.join(process.cwd(), "uploads/images", safeName);
+    const filePath = path.join(process.cwd(), "uploads/organization", safeName);
 
     // چک کن فایل وجود داره
     await fs.promises.access(filePath, fs.constants.F_OK);
@@ -46,7 +46,7 @@ export async function DELETE(req, context) {
     }
 
     const safeName = path.basename(filename); // جلوگیری از ../../
-    const filePath = path.join(process.cwd(), "uploads/images", safeName);
+    const filePath = path.join(process.cwd(), "uploads/organization", safeName);
 
     // چک کن فایل وجود داره
     await fs.promises.access(filePath, fs.constants.F_OK);

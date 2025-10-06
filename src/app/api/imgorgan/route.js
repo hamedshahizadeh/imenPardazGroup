@@ -2,7 +2,7 @@
 import fs from "fs";
 import path from "path";
 
-const IMAGES_DIR = path.join(process.cwd(), "uploads/images");
+const IMAGES_DIR = path.join(process.cwd(), "uploads/organization");
 const ALLOWED_EXT = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".avif", ".svg"];
 
 export async function GET() {

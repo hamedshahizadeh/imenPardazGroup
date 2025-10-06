@@ -11,12 +11,18 @@ import { signIn } from "next-auth/react";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
   const router = useRouter();
+
   const handleLogin = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     if (!email || !password) {
       toast.error("لطفاً ایمیل و رمز عبور را وارد کنید!");
+      setIsLoading(false);
+
       return;
     }
 
@@ -35,6 +41,7 @@ export default function LoginPage() {
       setEmail("");
       setPassword("");
     }
+    setIsLoading(false);
   };
 
   return (
@@ -81,8 +88,14 @@ export default function LoginPage() {
               type="submit"
               className="w-full text-sm  cursor-pointer flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold transition shadow-md"
             >
-              <FaSignInAlt size={14} />
-              ورود
+              {isLoading ? (
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              ) : (
+                <>
+                  <FaSignInAlt size={14} />
+                  ورود
+                </>
+              )}
             </button>
           </form>
           <div className="flex items-center justify-between mt-4 text-sm">
@@ -90,12 +103,6 @@ export default function LoginPage() {
               <input type="checkbox" className="accent-cyan-500" />
               <span>مرا به خاطر بسپار</span>
             </label>
-            <Link
-              href="/forgot-password"
-              className="text-cyan-400 hover:underline"
-            >
-              فراموشی رمز عبور؟
-            </Link>
           </div>
 
           <p className="text-center text-gray-400 mt-6 text-sm">

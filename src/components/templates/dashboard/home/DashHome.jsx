@@ -12,8 +12,10 @@ import {
 } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { useUser } from "../../../../../context/UserContext";
+import { useRouter } from "next/navigation";
 
 export default function DashHome() {
+  const router = useRouter();
   const [showModal, setShowModal] = useState(false);
   const [animateModal, setAnimateModal] = useState(false);
 
@@ -21,10 +23,13 @@ export default function DashHome() {
   const [animatePasswordModal, setAnimatePasswordModal] = useState(false);
   const user = useUser();
   const [newPassword, setNewPassword] = useState("");
+  const [oldPassword, setOldPassword] = useState("");
 
-  const [username, setUsername] = useState(user?.email);
   const [fullName, setFullName] = useState(user?.name);
+  const [userName, setUserName] = useState(user?.email);
   const [phone, setPhone] = useState(user?.phone);
+  const [isLoadPass, setIsLoadPass] = useState(false);
+  const [isLoadData, setIsLoadData] = useState(false);
   useEffect(() => {
     if (showModal) setTimeout(() => setAnimateModal(true), 10);
     else setAnimateModal(false);
@@ -35,27 +40,82 @@ export default function DashHome() {
     else setAnimatePasswordModal(false);
   }, [showPasswordModal]);
 
-  const handleSave = () => {
-    setAnimateModal(false);
-    setShowModal(false);
-    toast.success("اطلاعات با موفقیت بروزرسانی شد ✅");
-  };
+  const handleSave = async () => {
+    setIsLoadData(true);
+    if (!fullName || !userName || !phone) {
+      toast.error("لطفاً همه فیلدها را پر کنید");
+      setIsLoadData(false);
 
-  const handlePhotoChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setPhoto(URL.createObjectURL(e.target.files[0]));
-    }
-  };
-
-  const handlePasswordChange = () => {
-    if (newPassword.length < 4) {
-      toast.error("رمز عبور نباید کمتر از ۴ رقم باشد ");
       return;
     }
-    setAnimatePasswordModal(false);
-    setShowPasswordModal(false);
-    setNewPassword("");
-    toast.success("رمز عبور با موفقیت تغییر کرد 🔑");
+
+    // شرط برای username
+    if (userName.length < 8) {
+      toast.error("نام کاربری باید حداقل 8 کاراکتر باشد !");
+      setIsLoadData(false);
+
+      return;
+    }
+    const phoneRegex = /^09\d{9}$/;
+    if (!phoneRegex.test(phone)) {
+      toast.error("شماره تلفن باید با 09 شروع شود و 11 رقم باشد!");
+      setIsLoadData(false);
+
+      return;
+    }
+    const res = await fetch("/api/dashboard/user/edituser", {
+      method: "PATCH",
+      body: JSON.stringify({
+        userName: fullName,
+        userPhone: phone,
+        email: userName,
+      }),
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json();
+    if (res.status === 200) {
+      setAnimateModal(false);
+      setShowModal(false);
+      toast.success("اطلاعات  با موفقیت بروز رسانی شد‍");
+      router.refresh();
+      setIsLoadData(false);
+    } else {
+      toast.error(data.error);
+      setIsLoadData(false);
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    setIsLoadPass(true);
+    if (newPassword.length < 6 || !/[A-Z]/.test(newPassword)) {
+      toast.error(
+        "رمز عبور باید حداقل 6 کاراکتر باشد و حداقل یک حرف بزرگ انگلیسی داشته باشد!"
+      );
+      setIsLoadPass(false);
+
+      return;
+    }
+    const res = await fetch("/api/dashboard/user/editpass", {
+      method: "PATCH",
+      body: JSON.stringify({
+        newPassword,
+        oldPassword,
+        email: user?.email,
+      }),
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json();
+    if (res.status === 200) {
+      setAnimatePasswordModal(false);
+      setShowPasswordModal(false);
+      setNewPassword("");
+      toast.success("رمز عبور  با موفقیت بروز رسانی شد‍");
+      router.refresh();
+      setIsLoadPass(false);
+    } else {
+      toast.error(data.error);
+      setIsLoadPass(false);
+    }
   };
 
   return (
@@ -101,11 +161,13 @@ export default function DashHome() {
             <li className="flex items-center gap-2">
               <FaCrown className="text-yellow-400" />
               <span className="font-medium text-gray-400">نقش:</span>
-              {user?.role === "USER"
-                ? "کاربر عادی"
+              {user?.role === "OWER"
+                ? "مالک سایت"
                 : user?.role === "ADMIN"
                 ? "مدیر"
-                : "بدون نقش"}
+                : user?.role === "ADMIN"
+                ? "کاربر ويژه"
+                : "کاربر عادی"}
             </li>
           </ul>
 
@@ -145,6 +207,13 @@ export default function DashHome() {
 
             <input
               type="password"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              placeholder="رمز عبور قبلی"
+              className="w-full p-2 mb-5 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-yellow-500 text-xs md:text-sm font-medium"
+            />
+            <input
+              type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="رمز عبور جدید"
@@ -154,15 +223,19 @@ export default function DashHome() {
             <div className="flex justify-center gap-4 mt-6">
               <button
                 onClick={handlePasswordChange}
-                className="px-3 text-xs md:text-sm font-medium py-2 cursor-pointer rounded-lg bg-yellow-500 hover:bg-yellow-400 text-white transition shadow-lg"
+                className="flex justify-center items-center px-3 text-xs md:text-sm font-medium py-2 cursor-pointer rounded-lg bg-yellow-500 hover:bg-yellow-400 text-white transition shadow-lg"
               >
-                تغییر
+                {isLoadPass ? (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  "تغییر"
+                )}
               </button>
               <button
                 onClick={() => setShowPasswordModal(false)}
                 className="px-3 text-xs md:text-sm font-medium py-2 cursor-pointer rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition"
               >
-                انصراف
+                بستن
               </button>
             </div>
           </div>
@@ -197,20 +270,7 @@ export default function DashHome() {
                   className="p-2 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-[#49C5B6] text-xs md:text-sm font-medium"
                 />{" "}
               </div>{" "}
-              {/* نام کاربری */}{" "}
-              <div className="flex flex-col">
-                {" "}
-                <label className="mb-1 flex items-center gap-2 text-[10px] md:text-xs font-medium">
-                  {" "}
-                  <FaUser className="text-[#49C5B6]" /> نام کاربری{" "}
-                </label>{" "}
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="p-2 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-[#49C5B6] text-xs md:text-sm font-medium"
-                />{" "}
-              </div>{" "}
+          
               {/* شماره تماس */}{" "}
               <div className="flex flex-col">
                 {" "}
@@ -229,17 +289,20 @@ export default function DashHome() {
                 {" "}
                 <button
                   onClick={handleSave}
-                  className="px-3 text-xs md:text-sm font-medium py-2 cursor-pointer rounded-lg bg-[#49C5B6] hover:bg-[#31CCBA] text-white transition shadow-lg"
+                  className="flex items-center justify-center px-3 text-xs md:text-sm font-medium py-2 cursor-pointer rounded-lg bg-[#49C5B6] hover:bg-[#31CCBA] text-white transition shadow-lg"
                 >
-                  {" "}
-                  ذخیره{" "}
-                </button>{" "}
+                  {isLoadData ? (
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  ) : (
+                    "ویرایش"
+                  )}
+                </button>
                 <button
                   onClick={() => setShowModal(false)}
                   className="px-3 text-xs md:text-sm font-medium py-2 cursor-pointer rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition"
                 >
                   {" "}
-                  انصراف{" "}
+                  بستن{" "}
                 </button>{" "}
               </div>
             </div>

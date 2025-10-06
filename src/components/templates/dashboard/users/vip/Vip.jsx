@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FaUser,
   FaEdit,
@@ -11,50 +11,129 @@ import {
   FaUserTie,
 } from "react-icons/fa";
 import toast from "react-hot-toast";
-
 export default function VIPUsers() {
-  const [vipUsers, setVIPUsers] = useState([
-    {
-      id: 1,
-      name: "مریم احمدی",
-      username: "maryam123",
-      phone: "09121234567",
-      password: "123456",
-      role: "ویژه",
-    },
-    {
-      id: 2,
-      name: "علی رضایی",
-      username: "ali456",
-      phone: "09127654321",
-      password: "abcdef",
-      role: "ویژه",
-    },
-    {
-      id: 3,
-      name: "نرگس موسوی",
-      username: "narges789",
-      phone: "09129876543",
-      password: "qwerty",
-      role: "ویژه",
-    },
-  ]);
+  const [admins, setAdmins] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  const indexOfLastAdmin = currentPage * itemsPerPage;
+  const indexOfFirstAdmin = indexOfLastAdmin - itemsPerPage;
+  const currentAdmins = [...admins]
+    .reverse()
+    .slice(indexOfFirstAdmin, indexOfLastAdmin);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentAdmin, setCurrentAdmin] = useState(null);
+  const [isLoadAdd, setIsLoadAdd] = useState(false);
+  const [isLoadDelete, setIsLoadDelete] = useState(false);
+  const [isLoadEdit, setIsLoadEdit] = useState(false);
+  const [loadingFetch, setLoadingFetch] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
     username: "",
     phone: "",
     password: "",
-    role: "ویژه",
   });
 
-  const inputClasses =
-    "w-full p-2 rounded-md text-gray-200 bg-black/30 border border-gray-600 text-xs md:text-sm font-medium";
+  const handleAddAdmin = async (e) => {
+    e.preventDefault();
+    setIsLoadAdd(true);
+    if (
+      !formData.name ||
+      !formData.username ||
+      !formData.phone ||
+      !formData.password
+    ) {
+      toast.error("لطفاً همه فیلدها را پر کنید");
+      setIsLoadAdd(false);
+      return;
+    }
+
+    // شرط برای username
+    if (formData.username.length < 8) {
+      toast.error("نام کاربری باید حداقل 8 کاراکتر باشد !");
+      setIsLoadAdd(false);
+
+      return;
+    }
+    const phoneRegex = /^09\d{9}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      toast.error("شماره تلفن باید با 09 شروع شود و 11 رقم باشد!");
+      setIsLoadAdd(false);
+
+      return;
+    }
+    // شرط برای password
+    if (formData.password.length < 6 || !/[A-Z]/.test(formData.password)) {
+      toast.error(
+        "رمز عبور باید حداقل 6 کاراکتر باشد و حداقل یک حرف بزرگ انگلیسی داشته باشد!"
+      );
+      setIsLoadAdd(false);
+      return;
+    }
+
+    const res = await fetch("/api/dashboard/vip/add", {
+      method: "POST",
+      body: JSON.stringify({
+        name: formData.name,
+        email: formData.username,
+        phone: formData.phone,
+        password: formData.password,
+      }),
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json();
+
+    if (res.status === 200) {
+      toast.success(data.message);
+      await fetchAdmins();
+      setFormData({
+        name: "",
+        username: "",
+        phone: "",
+        password: "",
+      });
+      setIsLoadAdd(false);
+      setShowAddModal(false);
+    } else {
+      toast.error(data.error);
+      setIsLoadAdd(false);
+    }
+  };
+  const fetchAdmins = async () => {
+    setLoadingFetch(true)
+    try {
+      const res = await fetch("/api/dashboard/vip/all");
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || "خطا در دریافت اطلاعات");
+        return;
+      }
+      setAdmins(data.vips || []);
+    } catch (err) {
+      toast.error("خطای شبکه");
+      console.error(err);
+    }
+    finally{
+      setLoadingFetch(false)
+    }
+  };
+  useEffect(() => {
+    fetchAdmins();
+  }, []);
+  const handleOpenEditModal = (admin) => {
+    setCurrentAdmin(admin);
+    setFormData({
+      name: admin.name || "",
+      username: admin.email || "", // چون تو DB فیلد email داری
+      phone: admin.phone || "",
+      password: "", // پسورد رو معمولا خالی میذارن
+    });
+    setShowEditModal(true);
+  };
 
   const handleOpenAddModal = () => {
     setFormData({
@@ -62,125 +141,193 @@ export default function VIPUsers() {
       username: "",
       phone: "",
       password: "",
-      role: "ویژه",
-    });
+    }); // فرم خالی شود
     setShowAddModal(true);
   };
 
-  const handleAddUser = () => {
-    if (!formData.name || !formData.username || !formData.phone) {
-      toast.error("لطفاً همه فیلدها را پر کنید");
+  const handleEditAdmin = async () => {
+    if (!currentAdmin) return;
+    setIsLoadEdit(true);
+    if (!formData.name || !formData.phone) {
+      toast.error("لطفاً  فیلدهای نام و شماره تماس را پر کنید");
+      setIsLoadEdit(false);
       return;
     }
-    const newUser = { id: Date.now(), ...formData };
-    setVIPUsers([...vipUsers, newUser]);
-    toast.success(`کاربر ویژه "${formData.name}" اضافه شد`);
-    setFormData({
-      name: "",
-      username: "",
-      phone: "",
-      password: "",
-      role: "ویژه",
-    });
-    setShowAddModal(false);
+    const phoneRegex = /^09\d{9}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      toast.error("شماره تلفن باید با 09 شروع شود و 11 رقم باشد!");
+
+      setIsLoadEdit(false);
+
+      return;
+    }
+    // شرط برای password
+    if (
+      formData.password && // ← یعنی فقط اگر چیزی وارد شده
+      (formData.password.length < 6 || !/[A-Z]/.test(formData.password))
+    ) {
+      toast.error(
+        "رمز عبور باید حداقل 6 کاراکتر باشد و حداقل یک حرف بزرگ انگلیسی داشته باشد!"
+      );
+      setIsLoadEdit(false);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/dashboard/vip/${currentAdmin._id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success(data.message);
+        await fetchAdmins();
+        setIsLoadEdit(false);
+
+        setShowEditModal(false);
+        setCurrentAdmin(null);
+      } else {
+        toast.error(data.error);
+        setIsLoadEdit(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setIsLoadEdit(false);
+
+      toast.error("خطای شبکه");
+    }
   };
 
-  const handleOpenEditModal = (user) => {
-    setCurrentUser(user);
-    setFormData({ ...user });
-    setShowEditModal(true);
-  };
-
-  const handleEditUser = () => {
-    setVIPUsers(
-      vipUsers.map((u) =>
-        u.id === currentUser.id ? { ...formData, id: u.id } : u
-      )
-    );
-    toast.success(`کاربر ویژه "${formData.name}" ویرایش شد`);
-    setShowEditModal(false);
-    setCurrentUser(null);
-  };
-
-  const handleDeleteUser = (user) => {
-    setCurrentUser(user);
+  const handleDeleteAdmin = (admin) => {
+    setCurrentAdmin(admin);
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
-    setVIPUsers(vipUsers.filter((u) => u.id !== currentUser.id));
-    toast.success(`کاربر ویژه "${currentUser.name}" حذف شد`);
-    setShowDeleteModal(false);
-    setCurrentUser(null);
+  const confirmDelete = async () => {
+    if (!currentAdmin) return;
+    setIsLoadDelete(true);
+
+    try {
+      const res = await fetch(`/api/dashboard/vip/${currentAdmin._id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        // حذف موفقیت‌آمیز از state
+        toast.success(`کاربر ویژه "${currentAdmin.name}" حذف شد`);
+        setIsLoadDelete(false);
+
+        await fetchAdmins();
+
+        setShowDeleteModal(false);
+        setCurrentAdmin(null);
+      } else {
+        toast.error(data.error || "خطا در حذف کاربر ویژه");
+        setIsLoadDelete(false);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("خطای شبکه هنگام حذف کاربر ویژه");
+      setIsLoadDelete(false);
+    }
   };
+
+  const inputClasses =
+    "w-full p-2 rounded-md text-gray-200 bg-black/30 border border-gray-600 text-xs md:text-sm font-medium";
 
   return (
     <div className="space-y-6 container">
-      {/* هدر */}
-      <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl shadow-md flex flex-col md:flex-row items-center gap-4 font-medium">
-        <h1 className="text-gray-200 text-sm md:text-base">
-          مدیریت کاربران ویژه
-        </h1>
-      </div>
+      {/* مالک */}
 
-      {/* لیست کاربران ویژه */}
-      <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl shadow-md font-medium">
+      {/* کاربران ویژه */}
+      <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl shadow-md">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-sm md:text-base text-gray-200">
+          <h2 className="text-sm md:text-base font-medium text-gray-200">
             لیست کاربران ویژه
           </h2>
           <button
             onClick={handleOpenAddModal}
-            className="flex items-center gap-2 bg-[#49C5B6] hover:bg-[#37a199] cursor-pointer text-white text-xs md:text-sm px-2 py-1 rounded transition"
+            className="flex items-center gap-2 bg-[#49C5B6] hover:bg-[#37a199] text-white text-[10px] md:text-xs px-2 py-1 cursor-pointer rounded transition shadow-md"
           >
-            <FaPlus /> افزودن کاربر ویژه
+            <FaPlus /> افزودن کاربر ویژه جدید
           </button>
         </div>
-
-        <ul className="space-y-2">
-          {vipUsers.map((user) => (
-            <li
-              key={user.id}
-              className="flex justify-between items-center bg-white/10 p-3 rounded-lg hover:bg-white/20 transition font-medium"
-            >
-              <div>
-                <p className="text-gray-200 text-xs">{user.name}</p>
-                <p className="text-gray-400 text-xs">
-                  نام کاربری: {user.username}
-                </p>
-                <p className="text-gray-400 text-xs">
-                  شماره تماس: {user.phone}
-                </p>
-                <p className="text-gray-400 text-xs">نقش: {user.role}</p>
-              </div>
-              <div className="flex flex-col gap-2">
+           {loadingFetch ? (
+          <p className="text-center text-gray-400 text-sm">
+            در حال بارگذاری...
+          </p>
+        ) : currentAdmins.length === 0 ? (
+          <p className="text-center text-gray-400 text-sm">هیچ کاربر ویژه ای یافت نشد</p>
+        ) : (
+          <ul className="space-y-2">
+            {currentAdmins.map((admin) => (
+              <li
+                key={admin._id}
+                className="flex justify-between items-center bg-white/10 p-3 rounded-lg hover:bg-white/20 transition"
+              >
+                <div>
+                  <p className="text-gray-200 font-medium text-xs">
+                    {admin.name}
+                  </p>
+                  <p className="text-gray-400 text-xs font-medium">
+                    نام کاربری: {admin.email}
+                  </p>
+                  <p className="text-gray-400 text-xs font-medium">
+                    شماره تماس: {admin.phone}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => handleOpenEditModal(admin)}
+                    className="flex items-center gap-1 text-[10px] md:text-xs  px-2 py-1 cursor-pointer  rounded-xs justify-center bg-blue-600 hover:bg-blue-700 text-white transition"
+                  >
+                    <FaEdit /> ویرایش
+                  </button>
+                  <button
+                    onClick={() => handleDeleteAdmin(admin)}
+                    className="flex items-center justify-center gap-1 text-[10px] md:text-xs  px-2 py-1 cursor-pointer rounded-xs bg-red-600 hover:bg-red-700 text-white transition"
+                  >
+                    <FaTrash /> حذف
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+     
+    )}
+        {admins.length > itemsPerPage && (
+          <div className="flex justify-center gap-2 mt-4">
+            {Array.from(
+              { length: Math.ceil(admins.length / itemsPerPage) },
+              (_, i) => (
                 <button
-                  onClick={() => handleOpenEditModal(user)}
-                  className="flex items-center gap-1 text-[10px] md:text-xs px-2 py-1 cursor-pointer rounded-xs justify-center bg-blue-600 hover:bg-blue-700 text-white transition"
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`px-3 py-1 rounded ${
+                    currentPage === i + 1
+                      ? "bg-[#49C5B6] text-white"
+                      : "bg-gray-700 text-white"
+                  }`}
                 >
-                  <FaEdit /> ویرایش
+                  {i + 1}
                 </button>
-                <button
-                  onClick={() => handleDeleteUser(user)}
-                  className="flex items-center justify-center gap-1 text-[10px] md:text-xs px-2 py-1 cursor-pointer rounded-xs bg-red-600 hover:bg-red-700 text-white transition"
-                >
-                  <FaTrash /> حذف
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+              )
+            )}
+          </div>
+        )}
       </div>
 
-      {/* مودال افزودن */}
+      {/* مودال افزودن کاربر ويزه */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-3 mt-10 mb-10 overflow-y-auto">
-          <div className="bg-gray-900/90 backdrop-blur-xs rounded-2xl p-6 max-w-sm w-full space-y-3 overflow-y-auto max-h-[90vh] my-[10px] font-medium">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-3 mt-10 overflow-y-auto">
+          <div className="bg-gray-900/90 backdrop-blur-xs rounded-2xl p-6 max-w-sm w-full space-y-3 overflow-y-auto max-h-[90vh]">
             <h2 className="text-center text-sm md:text-base font-bold text-[#49C5B6] mb-2 flex items-center gap-2">
-              <FaUserShield /> افزودن کاربر ویژه
+              <FaUserShield /> افزودن کاربر ویژه جدید
             </h2>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2">
+            <div className="space-y-1">
+              <label className="flex items-center gap-2 font-medium">
                 <FaUser /> نام
               </label>
               <input
@@ -192,7 +339,7 @@ export default function VIPUsers() {
                 className={inputClasses}
               />
 
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-2 font-medium">
                 <FaUserShield /> نام کاربری
               </label>
               <input
@@ -204,7 +351,7 @@ export default function VIPUsers() {
                 className={inputClasses}
               />
 
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-2 font-medium">
                 <FaPhone /> شماره تماس
               </label>
               <input
@@ -216,7 +363,7 @@ export default function VIPUsers() {
                 className={inputClasses}
               />
 
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-2 font-medium">
                 <FaKey /> رمز عبور
               </label>
               <input
@@ -228,16 +375,21 @@ export default function VIPUsers() {
                 className={inputClasses}
               />
             </div>
+
             <div className="flex justify-end gap-2">
               <button
-                onClick={handleAddUser}
-                className="px-3 py-1 text-xs md:text-sm rounded-md bg-[#49C5B6] hover:bg-[#37a199] text-white transition  cursor-pointer"
+                onClick={handleAddAdmin}
+                className="px-3 py-1 flex items-center justify-center text-xs md:text-sm  cursor-pointer rounded-md bg-[#49C5B6] hover:bg-[#37a199] text-white transition"
               >
-                افزودن
+                {isLoadAdd ? (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  "افزودن"
+                )}
               </button>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="px-3 py-1 text-xs md:text-sm rounded-md bg-gray-700 hover:bg-gray-600 text-white transition  cursor-pointer"
+                className="px-3 py-1 text-xs md:text-sm  cursor-pointer rounded-md bg-gray-700 hover:bg-gray-600 text-white transition"
               >
                 بستن
               </button>
@@ -248,13 +400,13 @@ export default function VIPUsers() {
 
       {/* مودال ویرایش */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-3 mt-10 mb-10 overflow-y-auto">
-          <div className="bg-gray-900/90 backdrop-blur-xs rounded-2xl p-6 max-w-sm w-full space-y-3 overflow-y-auto max-h-[90vh] my-[10px] font-medium">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-3">
+          <div className="bg-gray-900/90 backdrop-blur-xs rounded-2xl p-6 max-w-sm w-full space-y-3 overflow-y-auto max-h-[90vh]">
             <h2 className="text-center text-sm md:text-base font-bold text-[#49C5B6] mb-2 flex items-center gap-2">
               <FaEdit /> ویرایش کاربر ویژه
             </h2>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2">
+            <div className="space-y-1">
+              <label className="flex items-center gap-2 font-medium">
                 <FaUser /> نام
               </label>
               <input
@@ -265,20 +417,7 @@ export default function VIPUsers() {
                 }
                 className={inputClasses}
               />
-
-              <label className="flex items-center gap-2">
-                <FaUserShield /> نام کاربری
-              </label>
-              <input
-                type="text"
-                value={formData.username}
-                onChange={(e) =>
-                  setFormData({ ...formData, username: e.target.value })
-                }
-                className={inputClasses}
-              />
-
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-2 font-medium">
                 <FaPhone /> شماره تماس
               </label>
               <input
@@ -290,7 +429,7 @@ export default function VIPUsers() {
                 className={inputClasses}
               />
 
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-2 font-medium">
                 <FaKey /> رمز عبور
               </label>
               <input
@@ -304,14 +443,18 @@ export default function VIPUsers() {
             </div>
             <div className="flex justify-end gap-2">
               <button
-                onClick={handleEditUser}
-                className="px-3 py-1 text-xs md:text-sm rounded-md bg-[#49C5B6] hover:bg-[#37a199] text-white transition cursor-pointer"
+                onClick={handleEditAdmin}
+                className="px-3 py-1 text-xs flex items-center justify-center md:text-sm rounded-md  cursor-pointer bg-[#49C5B6] hover:bg-[#37a199] text-white transition"
               >
-                ذخیره
+                {isLoadEdit ? (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  "تغییر"
+                )}
               </button>
               <button
                 onClick={() => setShowEditModal(false)}
-                className="px-3 py-1 text-xs md:text-sm rounded-md bg-gray-700 hover:bg-gray-600 text-white transition  cursor-pointer"
+                className="px-3 py-1 text-xs md:text-sm rounded-md  cursor-pointer bg-gray-700 hover:bg-gray-600 text-white transition"
               >
                 بستن
               </button>
@@ -322,19 +465,23 @@ export default function VIPUsers() {
 
       {/* مودال حذف */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-3 mt-10 mb-10 overflow-y-auto">
-          <div className="bg-gray-900/90 backdrop-blur-xs rounded-2xl p-6 max-w-sm w-full text-center my-[10px] font-medium">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-3">
+          <div className="bg-gray-900/90 backdrop-blur-xs rounded-2xl p-6 max-w-sm w-full text-center">
             <h2 className="text-xs md:text-sm font-medium text-white mb-4">
               آیا مطمئن هستید که می‌خواهید کاربر ویژه{" "}
-              <span className="text-[#49C5B6]">{currentUser?.name}</span> را حذف
-              کنید؟
+              <span className="text-[#49C5B6]">{currentAdmin?.name}</span> را
+              حذف کنید؟
             </h2>
             <div className="flex justify-center gap-4">
               <button
                 onClick={confirmDelete}
-                className="px-3 py-2 text-xs md:text-sm font-medium rounded-md bg-red-600 cursor-pointer hover:bg-red-700 text-white transition"
+                className="px-3 py-2 text-xs flex items-center justify-center md:text-sm font-medium rounded-md bg-red-600 cursor-pointer hover:bg-red-700 text-white transition"
               >
-                بله، حذف شود
+                {isLoadDelete ? (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  "حذف"
+                )}
               </button>
               <button
                 onClick={() => setShowDeleteModal(false)}
