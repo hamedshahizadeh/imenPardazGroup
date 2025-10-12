@@ -27,9 +27,7 @@ export default function TeamPage() {
       setLoadingFetch(true);
       const res = await fetch("/api/dashboard/team");
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.error || "خطا در دریافت اعضای تیم");
-
       setTeam(data.team || []);
     } catch (err) {
       console.error(err);
@@ -73,7 +71,7 @@ export default function TeamPage() {
 
   } catch (err) {
     console.error(err);
-    toast.error("❌ حذف ناموفق بود");
+    toast.error("حذف ناموفق بود");
   } finally {
     setLoadingDelete(false);
   }

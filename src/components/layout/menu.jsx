@@ -8,8 +8,7 @@ import SearchInput from "../modules/searchInput/SearchInput";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [submenuOpen, setSubmenuOpen] = useState(false);
-
+  const [submenuOpen, setSubmenuOpen] = useState(false);  
   return (
     <div className="bg-gray-950/80 backdrop-blur-[4PX] font-sans font-medium text-xs">
       <div className="container flex items-center justify-between">

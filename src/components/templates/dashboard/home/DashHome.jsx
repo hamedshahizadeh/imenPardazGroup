@@ -165,7 +165,7 @@ export default function DashHome() {
                 ? "مالک سایت"
                 : user?.role === "ADMIN"
                 ? "مدیر"
-                : user?.role === "ADMIN"
+                : user?.role === "VIP"
                 ? "کاربر ويژه"
                 : "کاربر عادی"}
             </li>

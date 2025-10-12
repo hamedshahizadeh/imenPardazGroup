@@ -4,8 +4,8 @@ import UserMenu from "./UserMenu";
 
 export default async function Header() {
   const user = await FindUserMong();
-  const name = user?.name || "hameed";
-  const email = user?.email || "hameed";
+  const name = user?.name || "کاربر";
+  const email = user?.email || "کاربر";
   const isLoggedIn = !!user;
   return (
     <div className=" bg-gray-950/80 backdrop-blur-[10px]">

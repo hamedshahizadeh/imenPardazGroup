@@ -84,10 +84,12 @@ export default function DashboardLayout({ children }) {
           </p>
           <p className="text-center text-[10px] md:text-xs text-gray-400 font-light">
             {user?.role === "OWER"
-              ? "مالک"
-              : user?.role === "ADMIN"
-              ? "مدیر"
-              : "کاربر عادی"}
+                ? "مالک سایت"
+                : user?.role === "ADMIN"
+                ? "مدیر"
+                : user?.role === "VIP"
+                ? "کاربر ويژه"
+                : "کاربر عادی"}
           </p>
         </div>
         <ul className="space-y-2 mt-4 ">

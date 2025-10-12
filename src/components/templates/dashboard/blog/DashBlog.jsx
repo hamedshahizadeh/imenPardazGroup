@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FaPlus,
   FaImage,
@@ -12,27 +12,59 @@ import {
   FaEyeSlash,
 } from "react-icons/fa";
 import toast, { Toaster } from "react-hot-toast";
+import Image from "next/image";
 
 export default function DashBlog() {
-  const [cards, setCards] = useState([]); // کارت‌ها
+  const [loadingPublish, setLoadingPublish] = useState({});
+  const [cards, setCards] = useState([]); // بلاگ‌ها
+  const [loadingFetch, setLoadingFetch] = useState(false);
+  const [loadingAdd, setLoadingAdd] = useState(false);
+  const [loadingDelete, setLoadingDelete] = useState(false);
+  const [loadingEdit, setLoadingEdit] = useState(false);
+
   const [showFormModal, setShowFormModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedCard, setSelectedCard] = useState(null);
 
   const [mode, setMode] = useState("create"); // create | edit
+  const [selectedCard, setSelectedCard] = useState(null);
 
-  // فرم
+  // فرم بلاگ
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState(null);
+  const [preview, setPreview] = useState("");
+  const [published, setPublished] = useState({});
 
-  const [published, setPublished] = useState({}); // وضعیت انتشار هر کارت
-  // 🚩 حالت‌های لودینگ
-  const [loadingDelete, setLoadingDelete] = useState(false);
-  const [loadingAdd, setLoadingAdd] = useState(false);
-  // باز کردن مودال ساخت مقاله جدید
+  // --- دریافت بلاگ‌ها از سرور ---
+  const fetchBlogs = async () => {
+    try {
+      setLoadingFetch(true);
+      const res = await fetch("/api/dashboard/blog");
+      const data = await res.json();
+      if (res.ok) {
+        setCards(data.blogs.reverse() || []);
+        // وضعیت انتشار را بر اساس داده سرور
+        const pubStatus = {};
+        (data.blogs || []).forEach((b) => {
+          pubStatus[b._id] = b.published;
+        });
+        setPublished(pubStatus);
+      } else {
+        throw new Error(data.error || "خطا در دریافت بلاگ‌ها");
+      }
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setLoadingFetch(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
+
+  // --- باز کردن مودال ساخت بلاگ ---
   const handleNewBlog = () => {
     resetForm();
     setMode("create");
@@ -44,10 +76,11 @@ export default function DashBlog() {
     setDescription("");
     setContent("");
     setImage(null);
-    setPreview(null);
+    setPreview("");
+    setSelectedCard(null);
   };
 
-  // ثبت مقاله جدید یا ویرایش
+  // --- ثبت یا ویرایش بلاگ ---
   const handleSubmit = async () => {
     if (!title || !description || !content || (!image && mode === "create")) {
       toast.error("لطفاً همه فیلدها و تصویر را وارد کنید");
@@ -61,61 +94,70 @@ export default function DashBlog() {
       if (image && mode === "create") {
         const formData = new FormData();
         formData.append("file", image);
-
         const res = await fetch("/api/imgblog/upload-image", {
           method: "POST",
           body: formData,
         });
-
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Upload failed");
-
         imgUrl = data.url || `/api/imgblog/${data.filename}`;
       }
 
+      // حذف /api/imgblog/ از URL
+      const cleanImgUrl = imgUrl ? imgUrl.replace(/^\/api\/imgblog\//, "") : "";
+
       if (mode === "create") {
-        const newCard = {
-          id: Date.now(),
+        const newBlog = {
           title,
           description,
           content,
-          img: imgUrl,
+          image: cleanImgUrl,
+          published: false,
         };
 
-        setCards((prev) => [...prev, newCard]);
-        setPublished((prev) => ({ ...prev, [newCard.id]: false })); // پیش‌فرض منتشر نشده
-    setLoadingAdd(false);
-
-        console.log({ ...newCard, published: false });
-        toast.success("مقاله جدید ساخته شد");
-      } else if (mode === "edit" && selectedCard) {
-    setLoadingAdd(true);
-
-        setCards((prev) =>
-          prev.map((c) =>
-            c.id === selectedCard.id
-              ? { ...c, title, description, content, img: preview }
-              : c
-          )
-        );
-
-        console.log({
-          ...selectedCard,
-          title,
-          description,
-          content,
-          img: preview,
-          published: published[selectedCard.id] || false,
+        const res = await fetch("/api/dashboard/blog", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newBlog),
         });
-    setLoadingAdd(false);
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || "خطا در ثبت بلاگ");
+        toast.success("مقاله جدید با موفقیت ثبت شد");
+        await fetchBlogs();
 
-        toast.success("مقاله ویرایش شد");
+        setShowFormModal(false);
+        resetForm();
+      } else if (mode === "edit" && selectedCard) {
+        try {
+          const updatedBlog = {
+            title,
+            description,
+            content,
+          };
+          const res = await fetch(
+            `/api/dashboard/blog/edit/${selectedCard._id}`,
+            {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(updatedBlog),
+            }
+          );
+
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.error || "خطا در ویرایش بلاگ");
+
+          toast.success("مقاله با موفقیت ویرایش شد");
+          await fetchBlogs();
+          setShowFormModal(false);
+          resetForm();
+        } catch (err) {
+          toast.error("خطا در ویرایش مقاله: " + err.message);
+        }
       }
-
-      setShowFormModal(false);
-      resetForm();
     } catch (err) {
       toast.error("خطا در آپلود یا ثبت مقاله: " + err.message);
+    } finally {
+      setLoadingAdd(false);
     }
   };
 
@@ -143,7 +185,7 @@ export default function DashBlog() {
 
     try {
       setLoadingDelete(true);
-      const filename = selectedCard.img.split("/").pop();
+      const filename = selectedCard.image.split("/").pop();
 
       const res = await fetch(`/api/imgblog/${filename}`, {
         method: "DELETE",
@@ -153,15 +195,16 @@ export default function DashBlog() {
         const data = await res.json();
         throw new Error(data.error || "حذف عکس با مشکل مواجه شد");
       }
-
-      setCards((prev) => prev.filter((c) => c.id !== selectedCard.id));
-      setPublished((prev) => {
-        const copy = { ...prev };
-        delete copy[selectedCard.id];
-        return copy;
+      const resapi = await fetch(`/api/dashboard/blog/${filename}`, {
+        method: "DELETE",
       });
+      if (!resapi.ok) {
+        const data = await resapi.json();
+        throw new Error(data.error || "حذف بلاگ با مشکل مواجه شد");
+      }
 
       toast.success(`مقاله "${selectedCard.title}" و عکس آن حذف شد`);
+      await fetchBlogs();
       setShowDeleteModal(false);
       setSelectedCard(null);
     } catch (err) {
@@ -179,18 +222,27 @@ export default function DashBlog() {
       setPreview(URL.createObjectURL(file));
     }
   };
-  // تغییر وضعیت انتشار
-  const togglePublish = (id) => {
-    setPublished((prev) => {
-      const newState = { ...prev, [id]: !prev[id] };
+  const togglePublish = async (id) => {
+    setLoadingPublish((prev) => ({ ...prev, [id]: true }));
+    try {
+      const res = await fetch(`/api/dashboard/blog/publish/${id}`, {
+        method: "PUT",
+      });
 
-      const card = cards.find((c) => c.id === id);
-      if (card) {
-        console.log({ ...card, published: newState[id] });
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "خطا در تغییر وضعیت انتشار");
 
-      return newState;
-    });
+      setPublished((prev) => {
+        const newState = { ...prev, [id]: !prev[id] };
+        return newState;
+      });
+
+      toast.success("وضعیت انتشار بلاگ تغییر کرد");
+    } catch (err) {
+      toast.error("خطا در تغییر وضعیت انتشار: " + err.message);
+    } finally {
+      setLoadingPublish((prev) => ({ ...prev, [id]: false }));
+    }
   };
 
   return (
@@ -205,17 +257,26 @@ export default function DashBlog() {
         </button>
       </div>
 
-      {cards.length ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+
+      {loadingFetch ? (
+        <p className="text-center text-gray-400 text-sm">در حال بارگذاری...</p>
+      ) : cards.length === 0 ? (
+        <p className="text-center text-gray-400 text-sm">هیچ مقاله ای یافت نشد</p>
+      ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {cards.map((card) => (
             <div
-              key={card.id}
+              key={card._id}
               className="bg-black/40 h-80 backdrop-blur-sm rounded-2xl shadow-lg p-4 flex flex-col"
             >
-              <img
-                src={card.img}
+              <Image
+                src={`/api/dashboard/blog/${card.image}`}
                 alt={card.title}
                 className="w-full h-40 object-cover rounded-md"
+                priority
+                width={200}
+                height={200}
               />
               <h3 className="text-sm font-bold text-white mt-2">
                 {card.title}
@@ -240,14 +301,16 @@ export default function DashBlog() {
                 </button>
 
                 <button
-                  onClick={() => togglePublish(card.id)}
+                  onClick={() => togglePublish(card._id)}
                   className={`flex-1 text-[10px] md:text-xs py-1 rounded transition cursor-pointer ${
-                    published[card.id]
+                    published[card._id]
                       ? "bg-green-600 hover:bg-green-700 text-white"
                       : "bg-gray-700 hover:bg-gray-600 text-gray-200"
                   }`}
                 >
-                  {published[card.id] ? (
+                  {loadingPublish[card._id] ? (
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block"></span>
+                  ) : published[card._id] ? (
                     <>
                       <FaEye className="inline mr-1" /> منتشر شده
                     </>
@@ -260,10 +323,7 @@ export default function DashBlog() {
               </div>
             </div>
           ))}
-        </div>
-      ) : (
-        <p className="text-gray-300 p-4">هیچ مقاله‌ای ساخته نشده است</p>
-      )}
+        </div> )}
 
       {/* مودال فرم */}
       {showFormModal && (
@@ -340,13 +400,15 @@ export default function DashBlog() {
             <div className="flex justify-end gap-2 pt-3">
               <button
                 onClick={handleSubmit}
-                  disabled={loadingAdd}
+                disabled={loadingAdd}
                 className="bg-green-600 px-3 py-2 text-xs font-medium cursor-pointer rounded-lg text-white hover:bg-green-700 transition disabled:opacity-50"
               >
                 {loadingAdd ? (
                   <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block"></span>
+                ) : mode === "create" ? (
+                  "ساخت مقاله"
                 ) : (
-                  mode === "create" ? "ساخت مقاله" :"ویرایش مقاله"
+                  "ویرایش مقاله"
                 )}
               </button>
               <button

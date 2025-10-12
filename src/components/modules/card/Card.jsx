@@ -2,15 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { FaClock } from "react-icons/fa6";
 
-export default function Card(item) {
-  const { img, date, title, description, id } = item;
+export default function Card({ img, date, title, description, id }) {
   return (
     <div className="bg-slate-900 rounded-lg shadow-md overflow-hidden w-full h-72 flex flex-col">
       <div className="relative w-full h-32">
         <Image
           priority
           src={img}
-          alt="راه اندازی سیستمهای یکپارچه"
+          alt={title}
           fill
           className="object-cover"
         />
@@ -29,7 +28,7 @@ export default function Card(item) {
         <div className="mt-auto">
           <Link
             href={`/cards/${id}`}
-            className="text-[#49C5B6] hover:text-[#31CCBA] text-xs font-medium "
+            className="text-[#49C5B6] hover:text-[#31CCBA] text-xs font-medium"
           >
             بیشتر بدانید →
           </Link>
