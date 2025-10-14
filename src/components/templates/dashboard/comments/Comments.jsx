@@ -3,13 +3,18 @@ import { useEffect, useState } from "react";
 import { FaEdit, FaTrash, FaReply, FaPlus } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { useUser } from "../../../../../context/UserContext";
+import Link from "next/link";
 
 export default function CommentsDashboard() {
-  // 🔹 برای پاسخ به کامنت‌ها
-const [commentReplies, setCommentReplies] = useState({});
+  const [isLoadAdd, setIsLoadAdd] = useState(false);
 
-// 🔹 برای پاسخ به ریپلای‌ها
-const [replyReplies, setReplyReplies] = useState({});
+  // 🔹 برای پاسخ به کامنت‌ها
+  const [commentReplies, setCommentReplies] = useState({});
+
+  // 🔹 برای پاسخ به ریپلای‌ها
+  const [replyReplies, setReplyReplies] = useState({});
+  const [loadingFetch, setLoadingFetch] = useState(false);
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeleteReplyModal, setShowDeleteReplyModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -36,11 +41,14 @@ const [replyReplies, setReplyReplies] = useState({});
 
   const fetchComments = async () => {
     try {
+      setLoadingFetch(true);
       const res = await fetch("/api/dashboard/comments");
       const data = await res.json();
       setBlogs(data);
     } catch {
       toast.error("خطا در دریافت کامنت‌ها");
+    } finally {
+      setLoadingFetch(false);
     }
   };
 
@@ -72,6 +80,8 @@ const [replyReplies, setReplyReplies] = useState({});
   // --- تابع انتشار ریپلای ---
   const handlePublishReply = async (replyId, commentId, blogId) => {
     try {
+      setIsLoadAdd(true);
+
       const res = await fetch(
         `/api/dashboard/comments/adminReply/publish/${commentId}`,
         {
@@ -82,15 +92,20 @@ const [replyReplies, setReplyReplies] = useState({});
       );
 
       if (!res.ok) throw new Error();
+      setIsLoadAdd(false);
+
       toast.success("ریپلای منتشر شد");
       await fetchComments(); // به‌روزرسانی لیست کامنت‌ها
     } catch {
       toast.error("خطا در انتشار ریپلای");
+      setIsLoadAdd(false);
     }
   };
 
   const handleRejectReply = async (replyId, commentId, adminMessage) => {
     try {
+      setIsLoadAdd(true);
+
       const res = await fetch(
         `/api/dashboard/comments/adminReply/reject/${commentId}`,
         {
@@ -106,12 +121,16 @@ const [replyReplies, setReplyReplies] = useState({});
 
       if (res.ok) {
         toast.success(" ریپلای با موفقیت رد شد");
+        setIsLoadAdd(false);
+
         await fetchComments();
       } else {
         toast.error(data.error || " خطا در رد ریپلای");
+        setIsLoadAdd(false);
       }
     } catch (err) {
       toast.error("مشکلی در سرور رخ داد");
+      setIsLoadAdd(false);
     }
   };
 
@@ -124,6 +143,8 @@ const [replyReplies, setReplyReplies] = useState({});
 
   const handleConfirmDeleteComment = async (commentId) => {
     try {
+      setIsLoadAdd(true);
+
       const res = await fetch(`/api/dashboard/comments/${commentId}/delete`, {
         method: "DELETE",
       });
@@ -132,11 +153,14 @@ const [replyReplies, setReplyReplies] = useState({});
       if (!res.ok) throw new Error(data.error || "خطا در حذف کامنت");
 
       toast.success(data.message);
+      setIsLoadAdd(false);
+
       setShowDeleteModal(false);
       await fetchComments();
     } catch (err) {
       console.error(err); // چاپ خطا در کنسول
       toast.error(err.message);
+      setIsLoadAdd(false);
     }
   };
 
@@ -144,6 +168,8 @@ const [replyReplies, setReplyReplies] = useState({});
     if (!deleteTarget) return;
 
     try {
+      setIsLoadAdd(true);
+
       const { replyId, commentId, blogId } = deleteTarget;
       const url = `/api/dashboard/comments/adminReply/delete/${commentId}`;
       const options = {
@@ -155,10 +181,13 @@ const [replyReplies, setReplyReplies] = useState({});
 
       if (!res.ok) throw new Error("خطا در حذف ریپلای");
       toast.success("ریپلای حذف شد");
+      setIsLoadAdd(false);
+
       setShowDeleteReplyModal(false);
       await fetchComments();
     } catch {
       toast.error("خطا در حذف ریپلای");
+      setIsLoadAdd(false);
     } finally {
       setShowDeleteReplyModal(false);
       setDeleteTarget(null);
@@ -167,6 +196,8 @@ const [replyReplies, setReplyReplies] = useState({});
 
   const handlePublishComment = async () => {
     try {
+      setIsLoadAdd(true);
+
       const res = await fetch(
         `/api/dashboard/comments/${currentComment._id}/approve`,
         {
@@ -174,6 +205,8 @@ const [replyReplies, setReplyReplies] = useState({});
         }
       );
       if (!res.ok) throw new Error();
+      setIsLoadAdd(false);
+
       toast.success("کامنت تایید و منتشر شد");
       await fetchComments();
       setShowPublishModal(false);
@@ -187,6 +220,7 @@ const [replyReplies, setReplyReplies] = useState({});
       );
     } catch {
       toast.error("خطا در تایید کامنت");
+      setIsLoadAdd(false);
     }
   };
 
@@ -196,6 +230,8 @@ const [replyReplies, setReplyReplies] = useState({});
       return;
     }
     try {
+      setIsLoadAdd(true);
+
       const res = await fetch(
         `/api/dashboard/comments/${currentComment._id}/reject`,
         {
@@ -205,6 +241,8 @@ const [replyReplies, setReplyReplies] = useState({});
         }
       );
       if (!res.ok) throw new Error();
+      setIsLoadAdd(false);
+
       toast.success("کامنت رد شد");
       setShowRejectModal(false);
       await fetchComments();
@@ -220,6 +258,7 @@ const [replyReplies, setReplyReplies] = useState({});
       );
     } catch {
       toast.error("خطا در رد کردن کامنت");
+      setIsLoadAdd(false);
     }
   };
 
@@ -270,64 +309,75 @@ const [replyReplies, setReplyReplies] = useState({});
     )
   );
 
+  const handleAddReplyToComment = async (commentId, blogId) => {
+    const text = commentReplies[commentId]?.trim();
+    if (!text) return toast.error("لطفاً متن پاسخ را وارد کنید");
 
-const handleAddReplyToComment = async (commentId, blogId) => {
-  const text = commentReplies[commentId]?.trim();
-  if (!text) return toast.error("لطفاً متن پاسخ را وارد کنید");
+    try {
+      setIsLoadAdd(true);
 
-  try {
-    const res = await fetch(`/api/dashboard/comments/adminReply/${commentId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        text,
-        isAdminReply: true,
-        blogId,
-        author: user?._id,
-      }),
-    });
+      const res = await fetch(
+        `/api/dashboard/comments/adminReply/${commentId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text,
+            isAdminReply: true,
+            blogId,
+            author: user?._id,
+          }),
+        }
+      );
 
-    if (!res.ok) throw new Error("خطا در افزودن پاسخ به کامنت");
+      if (!res.ok) throw new Error("خطا در افزودن پاسخ به کامنت");
+      setIsLoadAdd(false);
 
-    toast.success("پاسخ شما ارسال شد");
-    setCommentReplies((prev) => ({ ...prev, [commentId]: "" }));
-    setShowReplyForm((prev) => ({ ...prev, [commentId]: false }));
-    await fetchComments();
-  } catch (err) {
-    toast.error(err.message);
-  }
-};
+      toast.success("پاسخ شما ارسال شد");
+      setCommentReplies((prev) => ({ ...prev, [commentId]: "" }));
+      setShowReplyForm((prev) => ({ ...prev, [commentId]: false }));
+      await fetchComments();
+    } catch (err) {
+      setIsLoadAdd(false);
 
-const handleAddReplyToReply = async (replyId, commentId, blogId) => {
-  const text = replyReplies[replyId]?.trim();
-  if (!text) return toast.error("لطفاً متن پاسخ را وارد کنید");
+      toast.error(err.message);
+    }
+  };
 
-  try {
-    const res = await fetch(`/api/dashboard/comments/adminReplyToReply/${replyId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        text,
-        isAdminReply: true,
-        blogId,
-        commentId,
-        author: user?._id,
-      }),
-    });
+  const handleAddReplyToReply = async (replyId, commentId, blogId) => {
+    const text = replyReplies[replyId]?.trim();
+    if (!text) return toast.error("لطفاً متن پاسخ را وارد کنید");
 
-    if (!res.ok) throw new Error("خطا در افزودن پاسخ به ریپلای");
+    try {
+      setIsLoadAdd(true);
 
-    toast.success("پاسخ شما ارسال شد");
-    setReplyReplies((prev) => ({ ...prev, [replyId]: "" }));
-    setShowReplyForm((prev) => ({ ...prev, [replyId]: false }));
-    await fetchComments();
-  } catch (err) {
-    toast.error(err.message);
-  }
-};
+      const res = await fetch(
+        `/api/dashboard/comments/adminReplyToReply/${replyId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text,
+            isAdminReply: true,
+            blogId,
+            commentId,
+            author: user?._id,
+          }),
+        }
+      );
 
+      if (!res.ok) throw new Error("خطا در افزودن پاسخ به ریپلای");
+      setIsLoadAdd(false);
 
-
+      toast.success("پاسخ شما ارسال شد");
+      setReplyReplies((prev) => ({ ...prev, [replyId]: "" }));
+      setShowReplyForm((prev) => ({ ...prev, [replyId]: false }));
+      await fetchComments();
+    } catch (err) {
+      toast.error(err.message);
+      setIsLoadAdd(false);
+    }
+  };
 
   return (
     <div className="space-y-4 container">
@@ -341,7 +391,7 @@ const handleAddReplyToReply = async (replyId, commentId, blogId) => {
           <button
             key={status}
             onClick={() => setStatusFilter(status)}
-            className={`px-3 py-1 rounded text-xs ${
+            className={`px-3 py-1 rounded text-xs cursor-pointer ${
               statusFilter === status
                 ? status === "pending"
                   ? "bg-yellow-400 text-black"
@@ -366,217 +416,258 @@ const handleAddReplyToReply = async (replyId, commentId, blogId) => {
 
       {/* کامنت‌ها */}
       <h2 className="text-white font-semibold mb-2">کامنت‌ها</h2>
-      {filteredComments.length === 0 && (
-        <p className="text-gray-300 text-sm">
-          هیچ کامنتی برای نمایش وجود ندارد.
+      {loadingFetch ? (
+        <p className="text-center text-gray-400 text-sm">در حال بارگذاری...</p>
+      ) : filteredComments.length === 0 ? (
+        <p className="text-center text-gray-400 text-sm">
+          هیچ کامنتی یافت نشد
         </p>
-      )}
-      {filteredComments.map((blog) =>
-        blog.comments.map((comment) => (
-          <div
-            key={comment._id}
-            className={`bg-gray-800 rounded-lg p-3 hover:bg-gray-700 transition border-l-4 ${borderColor(
-              comment.status
-            )}`}
-          >
-            <p className="text-gray-200 font-medium text-xs">
-              {comment.author} {comment.status === "pending" && "(منتشر نشده)"}
-            </p>
-            <p className="text-gray-400 text-xs">{formatDate(comment.date)}</p>
-            <p className="text-gray-300 text-xs">{comment.text}</p>
-            {comment.status === "rejected" && comment.adminMessage && (
-              <p className="text-red-400 text-xs">
-                دلیل رد شدن: {comment.adminMessage}
-              </p>
-            )}
-            <div className="flex flex-wrap gap-1 mt-2">
-              {comment.status === "pending" && (
-                <>
+      ) : (
+        <div>
+          {filteredComments.map((blog) =>
+            blog.comments.map((comment) => (
+              <div
+                key={comment._id}
+                className={`bg-gray-800 rounded-lg p-3 mt-2 hover:bg-gray-700 transition border-l-4 ${borderColor(
+                  comment.status
+                )}`}
+              >
+                {/* 🔗 نمایش لینک بلاگ به صورت Next.js Link */}
+                <div className="flex items-center gap-1">
+                  <p className="text-xs font-medium text-gray-300">
+                    پست مربوط به :
+                  </p>
+                  <Link
+                    href={`/cards/${blog._id}`}
+                    className="text-[#49C5B6] text-xs font-semibold hover:underline block mb-1"
+                    target="_blank"
+                  >
+                    {blog.title || "مشاهده پست"}
+                  </Link>
+                </div>
+
+                <p className="text-gray-200 font-medium text-xs">
+                  {comment.author}{" "}
+                  {comment.status === "pending" && "(منتشر نشده)"}
+                </p>
+                <p className="text-gray-400 text-xs">
+                  {formatDate(comment.date)}
+                </p>
+                <p className="text-gray-300 text-xs">{comment.text}</p>
+
+                {comment.status === "rejected" && comment.adminMessage && (
+                  <p className="text-red-400 text-xs">
+                    دلیل رد شدن: {comment.adminMessage}
+                  </p>
+                )}
+
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {comment.status === "pending" && (
+                    <>
+                      <button
+                        onClick={() => {
+                          setCurrentComment(comment);
+                          setShowPublishModal(true);
+                        }}
+                        className="text-xs px-2 py-1 cursor-pointer bg-green-600 hover:bg-green-700 text-white rounded flex items-center gap-1"
+                      >
+                        <FaPlus /> انتشار
+                      </button>
+                      <button
+                        onClick={() => {
+                          setCurrentComment(comment);
+                          setRejectReason("");
+                          setShowRejectModal(true);
+                        }}
+                        className="text-xs px-2 py-1 cursor-pointer bg-red-600 hover:bg-red-700 text-white rounded flex items-center gap-1"
+                      >
+                        <FaTrash /> رد کردن
+                      </button>
+                    </>
+                  )}
+
+                  <button
+                    onClick={() =>
+                      setShowReplyForm((prev) => ({
+                        ...prev,
+                        [comment._id]: !prev[comment._id],
+                      }))
+                    }
+                    className="text-xs px-2 py-1 cursor-pointer bg-gray-700 hover:bg-gray-600 text-white rounded flex items-center gap-1"
+                  >
+                    <FaReply /> پاسخ
+                  </button>
+
                   <button
                     onClick={() => {
-                      setCurrentComment(comment);
-                      setShowPublishModal(true);
+                      setDeleteTarget({ type: "comment", id: comment._id });
+                      setShowDeleteModal(true);
                     }}
-                    className="text-xs px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded flex items-center gap-1"
+                    className="text-xs px-2 py-1 cursor-pointer bg-gray-700 hover:bg-gray-600 text-red-400 rounded flex items-center gap-1"
                   >
-                    <FaPlus /> انتشار
+                    حذف کامنت
                   </button>
-                  <button
-                    onClick={() => {
-                      setCurrentComment(comment);
-                      setRejectReason("");
-                      setShowRejectModal(true);
-                    }}
-                    className="text-xs px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded flex items-center gap-1"
-                  >
-                    <FaTrash /> رد کردن
-                  </button>
-                </>
-              )}
+                </div>
 
-              <button
-                onClick={() =>
-                  setShowReplyForm((prev) => ({
-                    ...prev,
-                    [comment._id]: !prev[comment._id],
-                  }))
-                }
-                className="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded flex items-center gap-1"
-              >
-                <FaReply /> پاسخ
-              </button>
-
-              <button
-                onClick={() => {
-                  setDeleteTarget({ type: "comment", id: comment._id }); // تغییرات برای ذخیره id کامنت
-                  setShowDeleteModal(true);
-                }}
-                className="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 text-red-400 rounded flex items-center gap-1"
-              >
-                حذف کامنت
-              </button>
-            </div>
-
-          {showReplyForm[comment._id] && (
-  <div className="mt-2 space-y-1">
-    <textarea
-      placeholder="متن پاسخ..."
-      value={commentReplies[comment._id] || ""}
-      onChange={(e) =>
-        setCommentReplies((prev) => ({
-          ...prev,
-          [comment._id]: e.target.value,
-        }))
-      }
-      className="w-full p-2 rounded-md bg-gray-700 text-gray-200 border border-gray-600 text-xs"
-      rows={2}
-    />
-    <button
-      onClick={() => handleAddReplyToComment(comment._id, blog._id)}
-      className="px-3 py-1 text-xs rounded-md bg-[#49C5B6] hover:bg-[#37a199] text-white transition cursor-pointer"
-    >
-      افزودن پاسخ
-    </button>
-  </div>
-)}
-
-          </div>
-        ))
+                {showReplyForm[comment._id] && (
+                  <div className="mt-2 space-y-1">
+                    <textarea
+                      placeholder="متن پاسخ..."
+                      value={commentReplies[comment._id] || ""}
+                      onChange={(e) =>
+                        setCommentReplies((prev) => ({
+                          ...prev,
+                          [comment._id]: e.target.value,
+                        }))
+                      }
+                      className="w-full p-2 cursor-pointer rounded-md bg-gray-700 text-gray-200 border border-gray-600 text-xs"
+                      rows={2}
+                    />
+                    <button
+                      onClick={() =>
+                        handleAddReplyToComment(comment._id, blog._id)
+                      }
+                      className="px-3 py-1 flex items-center justify-center text-xs rounded-md bg-[#49C5B6] hover:bg-[#37a199] text-white transition cursor-pointer"
+                    >
+                          {isLoadAdd ? (
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    ) : (
+                      "افزودن پاسخ"
+                    )}
+               
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
       )}
-
       {/* ریپلای‌ها */}
       <h2 className="text-white font-semibold mt-6 mb-2">ریپلای‌ها</h2>
-      {filteredReplies.length === 0 && (
-        <p className="text-gray-300 text-sm">
-          هیچ ریپلای‌ای برای نمایش وجود ندارد.
+      {loadingFetch ? (
+        <p className="text-center text-gray-400 text-sm">در حال بارگذاری...</p>
+      ) : filteredReplies.length === 0 ? (
+        <p className="text-center text-gray-400 text-sm">
+          هیچ پاسخی یافت نشد
         </p>
-      )}
-      {filteredReplies.map((reply) => (
-        <div
-          key={reply._id}
-          className={`bg-gray-800 rounded-lg p-3 hover:bg-gray-700 transition border-l-4 ${borderColor(
-            reply.status
-          )}`}
-        >
-          <p className="text-gray-200 font-medium text-xs">
-            {reply.isAdminReply ? "ادمین" : reply.author}{" "}
-            {reply.status === "pending" && "(منتشر نشده)"}
-          </p>
-          <p className="text-gray-400 text-xs">{formatDate(reply.date)}</p>
-          <p className="text-gray-300 text-xs">{reply.text}</p>
-          {reply.status === "rejected" && reply.adminMessage && (
-            <p className="text-red-400 text-xs">
-              دلیل رد شدن: {reply.adminMessage}
-            </p>
-          )}
-          <div className="flex flex-wrap gap-1 mt-2">
-            {reply.status === "pending" && (
-              <>
+      ) : (
+        <div>
+          {filteredReplies.map((reply) => (
+            <div
+              key={reply._id}
+              className={`bg-gray-800 rounded-lg p-3 mt-2 hover:bg-gray-700 transition border-l-4 ${borderColor(
+                reply.status
+              )}`}
+            >
+              <p className="text-gray-200 font-medium text-xs">
+                {reply.isAdminReply ? "ادمین" : reply.author}{" "}
+                {reply.status === "pending" && "(منتشر نشده)"}
+              </p>
+              <p className="text-gray-400 text-xs">{formatDate(reply.date)}</p>
+              <p className="text-gray-300 text-xs">{reply.text}</p>
+              {reply.status === "rejected" && reply.adminMessage && (
+                <p className="text-red-400 text-xs">
+                  دلیل رد شدن: {reply.adminMessage}
+                </p>
+              )}
+              <div className="flex flex-wrap gap-1 mt-2">
+                {reply.status === "pending" && (
+                  <>
+                    <button
+                      onClick={() => {
+                        setCurrentReply({
+                          replyId: reply._id,
+                          commentId: reply.parentCommentId,
+                          blogId: reply.blogId,
+                        });
+                        setShowPublishModalRep(true);
+                      }}
+                      className="text-xs px-2 py-1 cursor-pointer bg-green-600 hover:bg-green-700 text-white rounded flex items-center gap-1"
+                    >
+                      <FaPlus /> انتشار
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCurrentReply({
+                          replyId: reply._id,
+                          commentId: reply.parentCommentId,
+                          blogId: reply.blogId,
+                        });
+                        setShowRejectModalRep(true);
+                      }}
+                      className="text-xs px-2 py-1 cursor-pointer bg-red-600 hover:bg-red-700 text-white rounded flex items-center gap-1"
+                    >
+                      <FaTrash /> رد
+                    </button>
+                  </>
+                )}
+
+                {/* دکمه پاسخ */}
                 <button
                   onClick={() => {
-                    setCurrentReply({
-                      replyId: reply._id,
-                      commentId: reply.parentCommentId,
-                      blogId: reply.blogId,
-                    });
-                    setShowPublishModalRep(true);
+                    setShowReplyForm((prev) => ({
+                      ...prev,
+                      [reply._id]: !prev[reply._id],
+                    }));
                   }}
-                  className="text-xs px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded flex items-center gap-1"
+                  className="text-xs px-2 py-1 cursor-pointer bg-gray-700 hover:bg-gray-600 text-white rounded flex items-center gap-1"
                 >
-                  <FaPlus /> انتشار
+                  <FaReply /> پاسخ
                 </button>
+
+                {/* دکمه حذف ریپلای */}
                 <button
                   onClick={() => {
-                    setCurrentReply({
+                    setDeleteTarget({
+                      type: "reply",
                       replyId: reply._id,
-                      commentId: reply.parentCommentId,
-                      blogId: reply.blogId,
+                      commentId: reply.parentCommentId, // ← از parentCommentId استفاده می‌کنیم
+                      blogId: reply.blogId, // ← همینطور blogId
                     });
-                    setShowRejectModalRep(true);
+                    setShowDeleteReplyModal(true);
                   }}
-                  className="text-xs px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded flex items-center gap-1"
+                  className="text-xs cursor-pointer px-2 py-1 bg-gray-700 hover:bg-gray-600 text-red-400 rounded flex items-center gap-1"
                 >
-                  <FaTrash /> رد
+                  حذف ریپلای
                 </button>
-              </>
-            )}
-
-            {/* دکمه پاسخ */}
-            <button
-              onClick={() => {
-                setShowReplyForm((prev) => ({
-                  ...prev,
-                  [reply._id]: !prev[reply._id],
-                }));
-              }}
-              className="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded flex items-center gap-1"
-            >
-              <FaReply /> پاسخ
-            </button>
-
-            {/* دکمه حذف ریپلای */}
-            <button
-              onClick={() => {
-                setDeleteTarget({
-                  type: "reply",
-                  replyId: reply._id,
-                  commentId: reply.parentCommentId, // ← از parentCommentId استفاده می‌کنیم
-                  blogId: reply.blogId, // ← همینطور blogId
-                });
-                setShowDeleteReplyModal(true);
-              }}
-              className="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 text-red-400 rounded flex items-center gap-1"
-            >
-              حذف ریپلای
-            </button>
-          </div>
-          {showReplyForm[reply._id] && (
-  <div className="mt-2 space-y-1">
-    <textarea
-      placeholder="متن پاسخ..."
-      value={replyReplies[reply._id] || ""}
-      onChange={(e) =>
-        setReplyReplies((prev) => ({
-          ...prev,
-          [reply._id]: e.target.value,
-        }))
-      }
-      className="w-full p-2 rounded-md bg-gray-700 text-gray-200 border border-gray-600 text-xs"
-      rows={2}
-    />
-    <button
-      onClick={() =>
-        handleAddReplyToReply(reply._id, reply.parentCommentId, reply.blogId)
-      }
-      className="px-3 py-1 text-xs rounded-md bg-[#49C5B6] hover:bg-[#37a199] text-white transition cursor-pointer"
-    >
-      افزودن پاسخ
-    </button>
-  </div>
-)}
-
+              </div>
+              {showReplyForm[reply._id] && (
+                <div className="mt-2 space-y-1">
+                  <textarea
+                    placeholder="متن پاسخ..."
+                    value={replyReplies[reply._id] || ""}
+                    onChange={(e) =>
+                      setReplyReplies((prev) => ({
+                        ...prev,
+                        [reply._id]: e.target.value,
+                      }))
+                    }
+                    className="w-full p-2 rounded-md bg-gray-700 text-gray-200 border border-gray-600 text-xs"
+                    rows={2}
+                  />
+                  <button
+                    onClick={() =>
+                      handleAddReplyToReply(
+                        reply._id,
+                        reply.parentCommentId,
+                        reply.blogId
+                      )
+                    }
+                    className="px-3 py-1 flex items-center justify-center text-xs rounded-md bg-[#49C5B6] hover:bg-[#37a199] text-white transition cursor-pointer"
+                  >
+                    {isLoadAdd ? (
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    ) : (
+                      "افزودن پاسخ"
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
-      ))}
+      )}
 
       {/* --- مودال‌ها --- */}
       {showRejectModalRep && (
@@ -604,9 +695,13 @@ const handleAddReplyToReply = async (replyId, commentId, blogId) => {
                   setShowRejectModalRep(false);
                   setRejectReasonRep("");
                 }}
-                className="px-3 py-2 cursor-pointer rounded-md bg-red-600 hover:bg-red-700 text-white transition text-xs md:text-sm"
+                className="px-3 py-2 cursor-pointer flex items-center justify-center rounded-md bg-red-600 hover:bg-red-700 text-white transition text-xs md:text-sm"
               >
-                رد شود
+                {isLoadAdd ? (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  "رد شود"
+                )}
               </button>
 
               <button
@@ -629,9 +724,13 @@ const handleAddReplyToReply = async (replyId, commentId, blogId) => {
             <div className="flex justify-center gap-4">
               <button
                 onClick={handlePublishComment}
-                className="px-3 py-2 cursor-pointer rounded-md bg-green-600 hover:bg-green-700 text-white transition text-xs md:text-sm"
+                className="px-3 py-2 cursor-pointer flex items-center justify-center rounded-md bg-green-600 hover:bg-green-700 text-white transition text-xs md:text-sm"
               >
-                بله، منتشر شود
+                {isLoadAdd ? (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  "منتشر شود"
+                )}
               </button>
               <button
                 onClick={() => setShowPublishModal(false)}
@@ -661,9 +760,13 @@ const handleAddReplyToReply = async (replyId, commentId, blogId) => {
                     );
                   setShowPublishModalRep(false);
                 }}
-                className="px-3 py-2 cursor-pointer rounded-md bg-green-600 hover:bg-green-700 text-white transition text-xs md:text-sm"
+                className="px-3 py-2 cursor-pointer flex items-center justify-center rounded-md bg-green-600 hover:bg-green-700 text-white transition text-xs md:text-sm"
               >
-                بله، منتشر شود
+                {isLoadAdd ? (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  "منتشر شود"
+                )}
               </button>
               <button
                 onClick={() => setShowPublishModalRep(false)}
@@ -692,9 +795,13 @@ const handleAddReplyToReply = async (replyId, commentId, blogId) => {
             <div className="flex justify-center gap-4">
               <button
                 onClick={handleRejectComment}
-                className="px-3 py-2 cursor-pointer rounded-md bg-red-600 hover:bg-red-700 text-white transition text-xs md:text-sm"
+                className="px-3 py-2 cursor-pointer flex items-center justify-center rounded-md bg-red-600 hover:bg-red-700 text-white transition text-xs md:text-sm"
               >
-                رد شود
+                {isLoadAdd ? (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  "رد شود"
+                )}
               </button>
               <button
                 onClick={() => setShowRejectModal(false)}
@@ -717,9 +824,13 @@ const handleAddReplyToReply = async (replyId, commentId, blogId) => {
             <div className="flex justify-center gap-4">
               <button
                 onClick={() => handleConfirmDeleteComment(deleteTarget.id)} // ارسال commentId به تابع
-                className="px-3 py-2 cursor-pointer rounded-md bg-red-600 hover:bg-red-700 text-white transition text-xs md:text-sm"
+                className="px-3 py-2 cursor-pointer flex items-center justify-center rounded-md bg-red-600 hover:bg-red-700 text-white transition text-xs md:text-sm"
               >
-                بله، حذف شود
+                {isLoadAdd ? (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  "حذف شود"
+                )}
               </button>
               <button
                 onClick={() => setShowDeleteModal(false)}
@@ -742,9 +853,13 @@ const handleAddReplyToReply = async (replyId, commentId, blogId) => {
             <div className="flex justify-center gap-4">
               <button
                 onClick={handleConfirmDeleteReply}
-                className="px-3 py-2 cursor-pointer rounded-md bg-red-600 hover:bg-red-700 text-white transition text-xs md:text-sm"
+                className="px-3 py-2 cursor-pointer flex items-center justify-center rounded-md bg-red-600 hover:bg-red-700 text-white transition text-xs md:text-sm"
               >
-                بله، حذف شود
+                {isLoadAdd ? (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  "حذف شود"
+                )}
               </button>
               <button
                 onClick={() => setShowDeleteReplyModal(false)}

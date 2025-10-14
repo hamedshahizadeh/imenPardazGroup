@@ -36,7 +36,7 @@ export async function DELETE(req, context) {
       { status: 200 }
     );
   } catch (err) {
-    console.log(err);
+ 
     return NextResponse.json(
       { error: "مشکلی در سرور رخ داده است" },
       { status: 500 }

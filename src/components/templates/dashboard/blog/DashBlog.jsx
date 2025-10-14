@@ -248,7 +248,7 @@ export default function DashBlog() {
   return (
     <div className="container space-y-4">
       {/* دکمه ساخت مقاله جدید */}
-      <div className="flex justify-end">
+      <div className="flex justify-end pl-8 pt-2">
         <button
           onClick={handleNewBlog}
           className="flex items-center cursor-pointer gap-2 bg-[#49C5B6] hover:bg-[#37a199] text-white text-xs px-2 py-1 rounded transition"
@@ -257,14 +257,14 @@ export default function DashBlog() {
         </button>
       </div>
 
-
-
       {loadingFetch ? (
         <p className="text-center text-gray-400 text-sm">در حال بارگذاری...</p>
       ) : cards.length === 0 ? (
-        <p className="text-center text-gray-400 text-sm">هیچ مقاله ای یافت نشد</p>
+        <p className="text-center text-gray-400 text-sm">
+          هیچ مقاله ای یافت نشد
+        </p>
       ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {cards.map((card) => (
             <div
               key={card._id}
@@ -323,7 +323,8 @@ export default function DashBlog() {
               </div>
             </div>
           ))}
-        </div> )}
+        </div>
+      )}
 
       {/* مودال فرم */}
       {showFormModal && (

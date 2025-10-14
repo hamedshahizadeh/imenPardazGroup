@@ -54,7 +54,7 @@ export async function POST(req) {
       }
     );
   } catch (error) {
-    console.log(error);
+   
     return NextResponse.json(
       { error: "مشکلی در اتصال به سرور رخ داده است!" },
       {
