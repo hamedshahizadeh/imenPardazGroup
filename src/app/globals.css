@@ -1,7 +1,5 @@
 @import "tailwindcss";
 
-@import "tailwindcss";
-
 /* ایران‌سنس با وزن‌های مختلف */
 @font-face {
   font-family: "IranSans";
@@ -163,6 +161,8 @@
   -webkit-animation: float-up-down 4s ease-in-out infinite;
 }
 
+
+
 /* مخفی کردن اسکرول */
 body {
   overflow-y: scroll; /* همیشه جا برای اسکرول باشه */
@@ -182,13 +182,10 @@ body:hover::-webkit-scrollbar {
   width: 8px; /* Chrome, Safari */
 }
 
+
 body:hover::-webkit-scrollbar-thumb {
   background: #49c5b6;
   /*رنگاسکرول*/border-radius: 4px;
-  -webkit-border-radius:;
-  -moz-border-radius:;
-  -ms-border-radius:;
-  -o-border-radius:;
 }
 
 
@@ -208,7 +205,10 @@ body:hover::-webkit-scrollbar-thumb {
 ::-webkit-scrollbar-thumb {
   background-color: #49c5b6;
   border-radius: 15px;
-
+  -webkit-border-radius: 15px;
+  -moz-border-radius: 15px;
+  -ms-border-radius: 15px;
+  -o-border-radius: 15px;
 }
 
 

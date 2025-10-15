@@ -21,7 +21,7 @@ export default async function Blogs() {
       ).length,
     }))
     .sort((a, b) => b.approvedCommentsCount - a.approvedCommentsCount)
-    .slice(0, 5)
+    .slice(0, 5);
 
   return (
     <div className="bg-gray-950 min-h-screen pb-5 pt-20 lg:pt-24 ">
@@ -68,23 +68,23 @@ export default async function Blogs() {
                 </h2>
               </div>
               <ul className="space-y-2 pt-3">
-                 {popularBlogs.map((card) => (
-              <li
-                key={card._id}
-                className="text-gray-300 hover:text-[#49C5B6] px-4 font-medium text-xs md:text-sm"
-              >
-                <Link
-                  href={`/cards/${card._id}`}
-                  className="cursor-pointer flex items-center gap-2"
-                >
-                  <FaStar className="text-yellow-400" />
-                  {card.title}
-                  <span className="text-gray-500 text-xs ml-auto">
-                    ({card.approvedCommentsCount} نظر)
-                  </span>
-                </Link>
-              </li>
-            ))}
+                {popularBlogs.map((card) => (
+                  <li
+                    key={card._id}
+                    className="text-gray-300 hover:text-[#49C5B6] px-4 font-medium text-xs md:text-sm"
+                  >
+                    <Link
+                      href={`/cards/${card._id}`}
+                      className="cursor-pointer flex items-center gap-2"
+                    >
+                      <FaStar className="text-yellow-400" />
+                      {card.title}
+                      <span className="text-gray-500 text-xs ml-auto">
+                        ({card.approvedCommentsCount} نظر)
+                      </span>
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>

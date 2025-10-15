@@ -13,22 +13,23 @@ export default function Comments({ blogId, user, isLoggedIn }) {
   const [showReplyModal, setShowReplyModal] = useState(false);
   const [closing, setClosing] = useState(false);
   const [error, setError] = useState(false);
-    const [loadingFetch, setLoadingFetch] = useState(false);
-  
+  const [loadingFetch, setLoadingFetch] = useState(false);
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+
   // دریافت کامنت‌ها
   const fetchComments = async () => {
-    setLoadingFetch(true)
     if (!blogId) return;
+    setLoadingFetch(true);
     try {
       const res = await fetch(`/api/comments/${blogId}`);
       const data = await res.json();
-      if (res.ok) setComments(data.comments || []);
-      else toast.error(data.error || "خطا در دریافت کامنت‌ها");
+      if (res.ok && Array.isArray(data.comments)) setComments(data.comments);
+      else setComments([]);
     } catch {
       toast.error("خطا در اتصال به سرور");
-    }finally{
-    setLoadingFetch(false)
-
+      setComments([]);
+    } finally {
+      setLoadingFetch(false);
     }
   };
 
@@ -41,7 +42,7 @@ export default function Comments({ blogId, user, isLoggedIn }) {
       toast.error("برای ارسال پاسخ باید وارد شوید!");
       return;
     }
-    setReplyToId(commentId.toString()); // حتما string باشه
+    setReplyToId(commentId.toString());
     setShowReplyModal(true);
   };
 
@@ -64,6 +65,7 @@ export default function Comments({ blogId, user, isLoggedIn }) {
     if (!blogId || !user?._id) return toast.error("اطلاعات ناقص است.");
 
     try {
+      setLoadingSubmit(true);
       const res = await fetch("/api/comments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -71,43 +73,49 @@ export default function Comments({ blogId, user, isLoggedIn }) {
       });
       const data = await res.json();
       if (res.ok && data.comment) {
-        setComments([data.comment, ...comments]);
+        setComments([data.comment, ...comments]); // ✅ typo اصلاح شد
         setCommentText("");
         toast.success("نظر شما جهت بررسی ارسال شد ");
       } else throw new Error(data.error || "ارسال کامنت ناموفق بود");
     } catch (err) {
       toast.error(err.message || "خطا در ارسال کامنت");
+    } finally {
+      setLoadingSubmit(false);
     }
   };
 
+  // ارسال پاسخ به کامنت
   const handleSubmitReply = async () => {
     if (!replyText.trim()) return toast.error("چیزی وارد نکرده‌اید!");
+    if (!replyToId) return;
 
     try {
-      console.log("ارسال به:", replyToId); // برای دیباگ
+      setLoadingSubmit(true);
       const res = await fetch(`/api/comments/reply/${replyToId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ blogId, author: user._id, text: replyText }),
       });
       const data = await res.json();
-      if (!data.success) throw new Error(data.error);
-      toast.success(data.message);
+      if (!data.success) throw new Error(data.error || "ارسال پاسخ ناموفق بود");
+      toast.success(data.message || "پاسخ ارسال شد");
       setReplyText("");
       closeModal();
       fetchComments();
     } catch (err) {
       toast.error(err.message || "خطا در ارسال پاسخ");
+    } finally {
+      setLoadingSubmit(false);
     }
   };
 
-  // کامپوننت نمایش ریپلای‌ها به صورت بازگشتی
+  // نمایش ریپلای‌ها به صورت بازگشتی
   const ReplyList = ({ replies }) => {
     if (!replies || replies.length === 0) return null;
     return (
       <div className="pl-4 border-l border-gray-600 mt-2 space-y-2 font-medium">
         {replies
-          .filter((r) => r.status === "approved")
+          .filter((r) => r && r.status === "approved")
           .map((r) => (
             <div
               key={r._id}
@@ -116,16 +124,10 @@ export default function Comments({ blogId, user, isLoggedIn }) {
               <div className="flex justify-between w-full">
                 <div className="flex items-center gap-1">
                   <FaUser className="text-[#49C5B6] text-xs" />
-             <span className="text-xs md:text-sm">  {r.author?.name || r.author}</span>
-
+                  <span className="text-xs md:text-sm">
+                    {r.author?.name || r.author}
+                  </span>
                 </div>
-               {/*
-                <button
-                  onClick={() => openReplyModal(r._id)}
-                  className="text-[10px] md:text-xs text-[#49C5B6] hover:text-[#2a4b47]"
-                >
-                  پاسخ دادن
-                </button>*/ }
               </div>
               <p className="text-gray-300 text-[10px] md:text-xs lg:text-sm font-medium mb-1">
                 {r.text}
@@ -143,7 +145,10 @@ export default function Comments({ blogId, user, isLoggedIn }) {
     );
   };
 
-  const approvedComments = comments.filter((c) => c.status === "approved");
+  // فیلتر کامنت‌های تایید شده
+  const approvedComments = comments.filter(
+    (c) => c && c.status === "approved"
+  );
 
   return (
     <div className="bg-slate-900 rounded-lg shadow-md mt-6 p-4 font-medium">
@@ -154,50 +159,59 @@ export default function Comments({ blogId, user, isLoggedIn }) {
         </h2>
       </div>
 
-            {/* کارت‌های تیم */}
+      {/* نمایش کامنت‌ها */}
       {loadingFetch ? (
-        <p className="text-center text-gray-400 text-sm">در حال بارگذاری...</p>
+        <p className="text-center text-gray-400 text-sm animate-pulse">
+          در حال بارگذاری...
+        </p>
       ) : approvedComments.length === 0 ? (
-        <p className="text-center text-gray-400 text-sm">هیج نظری ثبت نشده است </p>
+        <div className="text-center py-8">
+          <p className="text-xl md:text-2xl font-bold text-gray-300 mb-2">
+            هنوز نظری ثبت نشده است
+          </p>
+          <p className="text-gray-400 text-sm md:text-base">
+            اولین کسی باشید که نظر خود را ثبت می‌کند!
+          </p>
+        </div>
       ) : (
-
-      <div className="space-y-4">
-        {approvedComments.map((c) => (
-          <div
-            key={c._id}
-            className="p-3 bg-slate-800 rounded-md flex flex-col gap-2"
-          >
-            <div className="flex justify-between items-start">
-              <div className="flex flex-col gap-1 w-full">
-                <div className="flex justify-between w-full">
+        <div className="space-y-4">
+          {approvedComments.map((c) => (
+            <div
+              key={c._id}
+              className="p-3 bg-slate-800 rounded-md flex flex-col gap-2"
+            >
+              <div className="flex justify-between items-start">
+                <div className="flex flex-col gap-1 w-full">
+                  <div className="flex justify-between w-full">
+                    <div className="flex items-center gap-1">
+                      <FaUser className="text-[#49C5B6] text-xs" />
+                      <span className="text-xs md:text-sm">
+                        {c.author?.name || c.author}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => openReplyModal(c._id)}
+                      className="text-[10px] md:text-xs text-[#49C5B6] hover:text-[#31CCBA] cursor-pointer"
+                    >
+                      پاسخ دادن
+                    </button>
+                  </div>
+                  <p className="text-gray-300 text-[10px] md:text-xs lg:text-sm font-medium mt-1">
+                    {c.text}
+                  </p>
                   <div className="flex items-center gap-1">
-                    <FaUser className="text-[#49C5B6] text-xs" />
-                    <span className="text-xs md:text-sm">
-                      {c.author?.name || c.author}
+                    <FaClock className="text-[#49C5B6] text-xs" />
+                    <span className="text-[10px] md:text-xs font-medium">
+                      {new Date(c.date).toLocaleDateString("fa-IR")}
                     </span>
                   </div>
-                  <button
-                    onClick={() => openReplyModal(c._id)}
-                    className="text-[10px] md:text-xs text-[#49C5B6] hover:text-[#31CCBA] cursor-pointer"
-                  >
-                    پاسخ دادن
-                  </button>
-                </div>
-                <p className="text-gray-300 text-[10px] md:text-xs lg:text-sm font-medium mt-1">
-                  {c.text}
-                </p>
-                <div className="flex items-center gap-1">
-                  <FaClock className="text-[#49C5B6] text-xs" />
-                  <span className="text-[10px] md:text-xs font-medium">
-                    {new Date(c.date).toLocaleDateString("fa-IR")}
-                  </span>
                 </div>
               </div>
+              {c.replies && <ReplyList replies={c.replies} />}
             </div>
-            {c.replies && <ReplyList replies={c.replies} />}
-          </div>
-        ))}
-      </div>)}
+          ))}
+        </div>
+      )}
 
       {/* فرم ارسال کامنت */}
       {isLoggedIn ? (
@@ -215,9 +229,14 @@ export default function Comments({ blogId, user, isLoggedIn }) {
           />
           <button
             onClick={addNewComment}
-            className="bg-[#49C5B6] text-white px-3 py-1 rounded text-sm hover:bg-[#31CCBA] mt-2 cursor-pointer"
+            className="bg-[#49C5B6] text-white px-3 py-1 rounded text-sm hover:bg-[#31CCBA] mt-2 cursor-pointer flex items-center justify-center"
+            disabled={loadingSubmit}
           >
-            ارسال نظر
+            {loadingSubmit ? (
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            ) : (
+              <>ارسال نظر</>
+            )}
           </button>
         </div>
       ) : (
@@ -225,7 +244,7 @@ export default function Comments({ blogId, user, isLoggedIn }) {
           <p className="mb-3">برای ارسال نظر ابتدا وارد سایت شوید</p>
           <Link
             href="/auth/login"
-            className="bg-[#49C5B6] text-white px-3 py-1 rounded text-sm hover:bg-[#31CCBA] mt-2 cursor-pointer text-xs"
+            className="bg-[#49C5B6] text-white px-3 py-1 rounded hover:bg-[#31CCBA] mt-2 cursor-pointer text-xs"
           >
             ورود به سایت
           </Link>
@@ -258,13 +277,18 @@ export default function Comments({ blogId, user, isLoggedIn }) {
             <div className="flex gap-2 mt-3">
               <button
                 onClick={handleSubmitReply}
-                className="bg-[#49C5B6] text-white px-3 py-1 rounded text-sm hover:bg-[#31CCBA]"
+                className="bg-[#49C5B6] text-white px-3 py-1 rounded text-sm hover:bg-[#31CCBA] cursor-pointer flex items-center justify-center"
+                disabled={loadingSubmit}
               >
-                ارسال پاسخ
+                {loadingSubmit ? (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  <>ارسال نظر</>
+                )}
               </button>
               <button
                 onClick={closeModal}
-                className="bg-gray-700 text-white px-3 py-1 rounded text-sm hover:bg-gray-600"
+                className="bg-gray-700 text-white px-3 py-1 rounded text-sm hover:bg-gray-600 cursor-pointer"
               >
                 بستن
               </button>

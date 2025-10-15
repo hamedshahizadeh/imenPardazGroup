@@ -23,12 +23,12 @@ export async function DELETE(req, { params }) {
     blog.comments = blog.comments.filter(c => c._id.toString() !== commentId);
 
     if (blog.comments.length === initialLength) {
-      console.log("Comment not found:", commentId);
+  
       return NextResponse.json({ error: "کامنت یافت نشد" }, { status: 404 });
     }
 
     await blog.save();
-    console.log("Deleted commentId:", commentId);
+
     return NextResponse.json({ message: "کامنت با موفقیت حذف شد" });
 
   } catch (error) {

@@ -1,6 +1,15 @@
-import CustomerReviews from '@/components/templates/dashboard/CustomerReviews/CustomerReviews'
-export default function page() {
-  return (
-    <CustomerReviews />
-  )
+import CustomerReviews from "@/components/templates/dashboard/CustomerReviews/CustomerReviews";
+import User from "@/models/User";
+import connectDB from "@/utils/connectDB";
+import FindUserMong from "@/utils/findUserMongo";
+import { redirect } from "next/navigation";
+export default async function page() {
+  await connectDB();
+  const session = await FindUserMong();
+  if (!session) redirect("/auth/login");
+  const user = await User.findOne({ email: session.email });
+  if (user.role !== "OWER") {
+    redirect("/dashboard");
+  }
+  return <CustomerReviews />;
 }
