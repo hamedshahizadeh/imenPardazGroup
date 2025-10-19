@@ -7,6 +7,7 @@
     url("../../public/fonts/IRANSansX-UltraLight.woff") format("woff");
   font-weight: 100; /* Thin */
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -15,6 +16,7 @@
     url("../../public/fonts/IRANSansX-Light.woff") format("woff");
   font-weight: 300; /* Light */
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -23,6 +25,7 @@
     url("../../public/fonts/IRANSansX-Regular.woff") format("woff");
   font-weight: 400; /* Regular */
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -31,6 +34,7 @@
     url("../../public/fonts/IRANSansX-Medium.woff") format("woff");
   font-weight: 500; /* Medium */
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -39,6 +43,7 @@
     url("../../public/fonts/IRANSansX-UltraLight.woff") format("woff");
   font-weight: 600; /* SemiBold */
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -47,6 +52,7 @@
     url("../../public/fonts/IRANSansX-Bold.woff") format("woff");
   font-weight: 700; /* Bold */
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -55,6 +61,7 @@
     url("../../public/fonts/IRANSansX-ExtraBold.woff") format("woff");
   font-weight: 800; /* ExtraBold */
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -63,6 +70,7 @@
     url("../../public/fonts/IRANSansX-Black.woff") format("woff");
   font-weight: 900; /* Black */
   font-style: normal;
+  font-display: swap;
 }
 
 /* تعریف کلاس container */
@@ -103,93 +111,111 @@
     }
   }
   @keyframes bounce-slow {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg);
-    -webkit-transform: translateY(0) rotate(0deg);
-    -moz-transform: translateY(0) rotate(0deg);
-    -ms-transform: translateY(0) rotate(0deg);
-    -o-transform: translateY(0) rotate(0deg);
-}
-  25% {
-    transform: translateY(-5px) rotate(3deg);
-    -webkit-transform: translateY(-5px) rotate(3deg);
-    -moz-transform: translateY(-5px) rotate(3deg);
-    -ms-transform: translateY(-5px) rotate(3deg);
-    -o-transform: translateY(-5px) rotate(3deg);
-}
-  50% {
-    transform: translateY(0) rotate(-3deg);
-    -webkit-transform: translateY(0) rotate(-3deg);
-    -moz-transform: translateY(0) rotate(-3deg);
-    -ms-transform: translateY(0) rotate(-3deg);
-    -o-transform: translateY(0) rotate(-3deg);
-}
-  75% {
-    transform: translateY(-3px) rotate(2deg);
-    -webkit-transform: translateY(-3px) rotate(2deg);
-    -moz-transform: translateY(-3px) rotate(2deg);
-    -ms-transform: translateY(-3px) rotate(2deg);
-    -o-transform: translateY(-3px) rotate(2deg);
-}
-}
+    0%,
+    100% {
+      transform: translateY(0) rotate(0deg);
+      -webkit-transform: translateY(0) rotate(0deg);
+      -moz-transform: translateY(0) rotate(0deg);
+      -ms-transform: translateY(0) rotate(0deg);
+      -o-transform: translateY(0) rotate(0deg);
+    }
+    25% {
+      transform: translateY(-5px) rotate(3deg);
+      -webkit-transform: translateY(-5px) rotate(3deg);
+      -moz-transform: translateY(-5px) rotate(3deg);
+      -ms-transform: translateY(-5px) rotate(3deg);
+      -o-transform: translateY(-5px) rotate(3deg);
+    }
+    50% {
+      transform: translateY(0) rotate(-3deg);
+      -webkit-transform: translateY(0) rotate(-3deg);
+      -moz-transform: translateY(0) rotate(-3deg);
+      -ms-transform: translateY(0) rotate(-3deg);
+      -o-transform: translateY(0) rotate(-3deg);
+    }
+    75% {
+      transform: translateY(-3px) rotate(2deg);
+      -webkit-transform: translateY(-3px) rotate(2deg);
+      -moz-transform: translateY(-3px) rotate(2deg);
+      -ms-transform: translateY(-3px) rotate(2deg);
+      -o-transform: translateY(-3px) rotate(2deg);
+    }
+  }
 
-.animate-bounce-slow {
-  animation: bounce-slow 3s infinite ease-in-out;
-  -webkit-animation: bounce-slow 3s infinite ease-in-out;
-}
+  .animate-bounce-slow {
+    animation: bounce-slow 3s infinite ease-in-out;
+    -webkit-animation: bounce-slow 3s infinite ease-in-out;
+  }
 
+  @keyframes float-up-down {
+    0%,
+    100% {
+      transform: translateY(0);
+      -webkit-transform: translateY(0);
+      -moz-transform: translateY(0);
+      -ms-transform: translateY(0);
+      -o-transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+      -webkit-transform: translateY(-10px);
+      -moz-transform: translateY(-10px);
+      -ms-transform: translateY(-10px);
+      -o-transform: translateY(-10px);
+    }
+  }
 
-@keyframes float-up-down {
-  0%, 100% {
-    transform: translateY(0);
-    -webkit-transform: translateY(0);
-    -moz-transform: translateY(0);
-    -ms-transform: translateY(0);
-    -o-transform: translateY(0);
-}
-  50% {
-    transform: translateY(-10px);
-    -webkit-transform: translateY(-10px);
-    -moz-transform: translateY(-10px);
-    -ms-transform: translateY(-10px);
-    -o-transform: translateY(-10px);
-}
-}
+  .animate-float {
+    animation: float-up-down 4s ease-in-out infinite;
+    -webkit-animation: float-up-down 4s ease-in-out infinite;
+  }
 
-.animate-float {
-  animation: float-up-down 4s ease-in-out infinite;
-  -webkit-animation: float-up-down 4s ease-in-out infinite;
-}
+  @keyframes ping-slow {
+    0% {
+      transform: scale(1);
+      opacity: 0.5;
+    }
+    70% {
+      transform: scale(2);
+      opacity: 0;
+      -webkit-transform: scale(2);
+      -moz-transform: scale(2);
+      -ms-transform: scale(2);
+      -o-transform: scale(2);
+    }
+    100% {
+      opacity: 0;
+    }
+  }
 
+  .animate-ping-slow {
+    animation: ping-slow 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
 
+  /* مخفی کردن اسکرول */
+  body {
+    overflow-y: scroll; /* همیشه جا برای اسکرول باشه */
+    scrollbar-width: none; /* Firefox */
+  }
 
-/* مخفی کردن اسکرول */
-body {
-  overflow-y: scroll; /* همیشه جا برای اسکرول باشه */
-  scrollbar-width: none; /* Firefox */
-}
+  body::-webkit-scrollbar {
+    width: 0px; /* Chrome, Safari */
+  }
 
-body::-webkit-scrollbar {
-  width: 0px; /* Chrome, Safari */
-}
+  /* وقتی موس روی صفحه اومد → اسکرول نشون بده */
+  body:hover {
+    scrollbar-width: thin; /* Firefox */
+  }
 
-/* وقتی موس روی صفحه اومد → اسکرول نشون بده */
-body:hover {
-  scrollbar-width: thin; /* Firefox */
-}
+  body:hover::-webkit-scrollbar {
+    width: 8px; /* Chrome, Safari */
+  }
 
-body:hover::-webkit-scrollbar {
-  width: 8px; /* Chrome, Safari */
-}
-
-
-body:hover::-webkit-scrollbar-thumb {
-  background: #49c5b6;
-  /*رنگاسکرول*/border-radius: 4px;
-}
-
-
-
+  body:hover::-webkit-scrollbar-thumb {
+    background: #49c5b6;
+    /*رنگاسکرول*/
+    border-radius: 4px;
+  }
 }
 
 @theme {
@@ -210,6 +236,3 @@ body:hover::-webkit-scrollbar-thumb {
   -ms-border-radius: 15px;
   -o-border-radius: 15px;
 }
-
-
-

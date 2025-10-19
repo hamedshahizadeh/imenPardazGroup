@@ -26,11 +26,12 @@ export default async function Blogs() {
   return (
     <div className="bg-gray-950 min-h-screen pb-5 pt-20 lg:pt-24 ">
       <div className=" container">
-        <h3 className="text-sm md:text-base font-sans font-black mb-3 text-[#49C5B6] text-center py-2 rounded-md  bg-black/40 backdrop-blur-[5px]">
-          لیست آخرین مقالات
-        </h3>
+     
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 my-4 gap-3 md:gap-4 lg:gap-6">
           <div className="col-span-1 md:col-span-2 lg:col-span-3">
+               <h3 className="text-sm md:text-base font-sans font-black mb-3 text-[#49C5B6] text-center py-2 rounded-md  bg-black/40 backdrop-blur-[5px]">
+          لیست آخرین مقالات
+        </h3>
             <div className="grid lg:grid-cols-2 gap-3 md:gap-4 lg:gap-6">
               {blogss.map((item) => (
                 <Card

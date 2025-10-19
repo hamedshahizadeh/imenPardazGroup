@@ -47,7 +47,7 @@ export default function Chat() {
                 </div>
                 <div className="flex justify-center w-full">
                   <Image
-                    src="/images/chat.png"
+                    src="/images/chat.jpg"
                     className="animate-float w-fit h-40 md:h-80 lg:h-auto"
                     width={400}
                     height={400}
@@ -65,7 +65,7 @@ export default function Chat() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4 lg:gap-5">
                    <div className="lg:flex justify-center hidden ">
                   <Image
-                    src="/images/chat.png"
+                    src="/images/chat.jpg"
                     className="animate-float w-fit h-40 md:h-80 lg:h-auto"
                     width={400}
                     height={400}

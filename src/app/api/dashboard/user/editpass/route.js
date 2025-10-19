@@ -36,7 +36,7 @@ export async function PATCH(req) {
   const isValid = await verifyPassword(oldPassword, user.password);
   if (!isValid) {
     return NextResponse.json(
-      { error: "رمز عبور فعلی اشتباه است" },
+      { error: "رمز عبور قبلی اشتباه است" },
       { status: 401 }
     );
   }

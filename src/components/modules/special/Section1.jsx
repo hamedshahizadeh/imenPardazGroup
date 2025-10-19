@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
@@ -247,8 +247,6 @@ export default function TextSliderWithPopups() {
     </div>
   );
 }
-
-// کامپوننت collapsible
 function CollapsibleButton({
   title,
   content,
@@ -258,26 +256,20 @@ function CollapsibleButton({
   swiperRef,
 }) {
   const contentRef = useRef(null);
-  const [height, setHeight] = useState(0);
+  const isOpen = openIndex === index;
+
+  // ✅ بروزرسانی ارتفاع Swiper پس از باز/بسته شدن
+  useEffect(() => {
+    // کمی تاخیر برای اطمینان از اعمال transition
+    const timer = setTimeout(() => {
+      swiperRef.current?.updateAutoHeight(300);
+    }, 350); // بعد از transition انجام شود
+    return () => clearTimeout(timer);
+  }, [isOpen, swiperRef]);
 
   const toggle = () => {
-    if (openIndex === index) {
-      setHeight(0);
-      setOpenIndex(null);
-    } else {
-      setHeight(contentRef.current.scrollHeight);
-      setOpenIndex(index);
-    }
-
-    // 👇 آپدیت ارتفاع Swiper بعد از تغییر
-    setTimeout(() => {
-      swiperRef.current?.updateAutoHeight(300);
-    }, 50);
+    setOpenIndex(isOpen ? null : index);
   };
-
-  if (openIndex !== index && height !== 0) setHeight(0);
-
-  const isOpen = openIndex === index;
 
   return (
     <div className="overflow-hidden rounded shadow-sm">
@@ -300,7 +292,9 @@ function CollapsibleButton({
 
       <div
         ref={contentRef}
-        style={{ maxHeight: height }}
+        style={{
+          maxHeight: isOpen ? contentRef.current?.scrollHeight : 0,
+        }}
         className="overflow-hidden transition-[max-height] duration-500 ease-in-out bg-slate-800 rounded-b"
       >
         <p className="py-2 px-3 text-justify text-gray-300 whitespace-pre-line text-xs lg:text-sm leading-relaxed">

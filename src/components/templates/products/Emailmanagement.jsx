@@ -96,7 +96,7 @@ export default function Emailmanagement() {
                     <CollapseList />
                 </div>
                 <div className="flex justify-center w-full">
-                    <Image src="/images/pemail.png" className="animate-float w-fit h-40 md:h-80 lg:h-auto" width={400} height={400} alt="ایمیل سازمانی شرکت ایمن پرداز" priority/>
+                    <Image src="/images/pemail.jpg" className="animate-float w-fit h-40 md:h-80 lg:h-auto" width={400} height={400} alt="ایمیل سازمانی شرکت ایمن پرداز" priority/>
                 </div>
             </div>
             </div>

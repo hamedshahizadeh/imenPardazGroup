@@ -8,7 +8,7 @@ export default async function page() {
   const session = await FindUserMong();
   if (!session) redirect("/auth/login");
   const user = await User.findOne({ email: session.email });
-  if (user.role !== "OWER") {
+  if (user.role !== "OWER" && user.role !== "ADMIN" && user.role !== "VIP" && user.role !== "USER") {
     redirect("/dashboard");
   }
   return <MyComments />;

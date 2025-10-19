@@ -62,7 +62,7 @@ export default async function Section1() {
                       height={200}
                       src={`/api/dashboard/team/${member.image}`}
                       alt={member.name}
-                      className="w-12 h-12 object-cover rounded-full mx-auto mb-4 border-2 border-[#49C5B6]"
+                      className="w-14 h-14 md:h-16 md:w-16 lg:h-20 lg:w-20 object-cover rounded-full mx-auto mb-4 border-2 border-[#49C5B6]"
                     />
                     <h3 className="text-sm font-medium mb-2 text-center">
                       {member.name}

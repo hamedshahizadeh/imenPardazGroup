@@ -30,20 +30,6 @@ export default function Section1() {
       تبادل اطلاعات به صورت امن و سریع انجام شود. بدین ترتیب سازمان‌ها 
       به سطحی جدید از بهره‌وری و کنترل دست پیدا می‌کنند.
     </p>
-
-    {/* دکمه بیشتر بدانید */}
-    <div className="mt-8">
-      <Link
-        href="/learn-more"
-        className="inline-flex items-center justify-center px-3 md:px-4 lg:px-6 py-2 lg:py-3
-        text-xs 
-                   bg-[#0CA59D] text-white font-semibold rounded-full 
-                   shadow-lg hover:bg-green-400 hover:scale-105 
-                   transition transform duration-300"
-      >
-        بیشتر بدانید
-      </Link>
-    </div>
   </div>
 </div>
 

@@ -109,6 +109,7 @@ export default function DashHome() {
       setAnimatePasswordModal(false);
       setShowPasswordModal(false);
       setNewPassword("");
+      setOldPassword("");
       toast.success("رمز عبور  با موفقیت بروز رسانی شد‍");
       router.refresh();
       setIsLoadPass(false);
@@ -232,7 +233,11 @@ export default function DashHome() {
                 )}
               </button>
               <button
-                onClick={() => setShowPasswordModal(false)}
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setNewPassword("");
+                  setOldPassword("");
+                }}
                 className="px-3 text-xs md:text-sm font-medium py-2 cursor-pointer rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition"
               >
                 بستن
@@ -270,7 +275,6 @@ export default function DashHome() {
                   className="p-2 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-[#49C5B6] text-xs md:text-sm font-medium"
                 />{" "}
               </div>{" "}
-          
               {/* شماره تماس */}{" "}
               <div className="flex flex-col">
                 {" "}

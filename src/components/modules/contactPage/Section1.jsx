@@ -45,7 +45,7 @@ export default function Section1() {
               </div>
 
               <span className="text-xs">
-                ردبیل - میدان باکری - پارک علم و فناوری
+                اردبیل - میدان باکری - پارک علم و فناوری
               </span>
             </div>
           </div>

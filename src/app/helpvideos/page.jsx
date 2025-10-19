@@ -21,14 +21,13 @@ export default async function Page() {
               شما مجاز به مشاهده این بخش نیستید.
             </p>
             <p className="text-gray-400 text-sm font-medium mb-6">
-              اگر فکر می‌کنید باید به این بخش دسترسی داشته باشید، لطفاً با مدیر
-              سایت تماس بگیرید.
+              تنها کاربران ویژه به این صفحه دسترسی دارند.
             </p>
             <Link
               href="/auth/login" // اگر نیاز به ارجاع به صفحه ورود داشتید
               className="bg-[#49C5B6] text-white px-2 py-1  font-medium text-sm rounded-lg hover:bg-[#37A199] transition duration-300"
             >
-              ورود به سیستم
+              ورود با حساب VIP
             </Link>
           </div>
         </div>
